@@ -1,4 +1,4 @@
-class Offer {
+﻿class Offer {
   final int id;
   final String title;
   final String? description;
@@ -15,8 +15,9 @@ class Offer {
         title: j['title'] ?? '',
         description: j['description'],
         imageUrl: j['image_url'],
-        discountPercentage: j['discount_percentage'] != null ? (j['discount_percentage']).toDouble() : null,
+        discountPercentage: double.tryParse(j['discount_percentage']?.toString() ?? ''),
         productSlug: j['product_slug'],
         link: j['link'],
       );
 }
+

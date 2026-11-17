@@ -23,7 +23,7 @@ class AuthRequiredView extends StatelessWidget {
             const SizedBox(height: 18),
             Text('تسجيل الدخول مطلوب', style: AppTheme.display.copyWith(fontSize: 18)),
             const SizedBox(height: 8),
-            Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted)),
+            Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => Navigator.push(

@@ -87,7 +87,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   const SizedBox(width: 8),
                   StatusBadge(o.paymentLabel, statusColor(o.paymentStatus)),
                   const Spacer(),
-                  Text('${o.itemsCount} عنصر', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                  Text('${o.itemsCount} عنصر', style: TextStyle(color: AppColors.muted, fontSize: 12)),
                 ],
               ),
             ],

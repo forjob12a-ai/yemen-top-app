@@ -8,7 +8,6 @@ class Package {
   final int discountPercent;
   final bool inStock;
   final String currency;
-
   Package({
     required this.id,
     required this.name,
@@ -20,13 +19,12 @@ class Package {
     this.inStock = true,
     this.currency = 'YER',
   });
-
   factory Package.fromJson(Map<String, dynamic> j) => Package(
         id: j['id'],
         name: j['name'] ?? '',
         description: j['description'],
-        price: (j['price'] ?? 0).toDouble(),
-        originalPrice: j['original_price'] != null ? (j['original_price']).toDouble() : null,
+        price: double.tryParse((j['price'] ?? 0).toString()) ?? 0,
+        originalPrice: j['original_price'] != null ? double.tryParse(j['original_price'].toString()) : null,
         hasDiscount: j['has_discount'] ?? false,
         discountPercent: j['discount_percent'] ?? 0,
         inStock: j['in_stock'] ?? true,

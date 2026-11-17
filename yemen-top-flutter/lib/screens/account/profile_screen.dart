@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_client.dart';
 import '../../widgets/common.dart';
@@ -61,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.account_balance_wallet, color: AppColors.gold),
                       const SizedBox(width: 10),
-                      const Text('رصيد المحفظة', style: TextStyle(color: AppColors.muted)),
+                      Text('رصيد المحفظة', style: TextStyle(color: AppColors.muted)),
                       const Spacer(),
                       Text(money(auth.user?.walletBalance ?? 0),
                           style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 17)),
@@ -75,12 +76,39 @@ class ProfileScreen extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()))),
                 _tile(context, Icons.notifications_outlined, 'الإشعارات', () =>
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()))),
-                const Divider(color: AppColors.line, height: 28),
+                Divider(color: AppColors.line, height: 28),
+                _themeToggle(context),
                 _tile(context, Icons.edit_outlined, 'تعديل الملف الشخصي', () => _editProfile(context)),
                 _tile(context, Icons.lock_outline, 'تغيير كلمة المرور', () => _changePassword(context)),
                 _tile(context, Icons.logout, 'تسجيل الخروج', () => _logout(context), color: AppColors.bad),
               ],
             ),
+    );
+  }
+
+  Widget _themeToggle(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+      decoration: BoxDecoration(
+          color: AppColors.navy, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.line)),
+      child: Row(
+        children: [
+          Icon(isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+              color: AppColors.text, size: 21),
+          const SizedBox(width: 14),
+          Expanded(
+              child: Text(isDark ? 'الوضع الليلي' : 'الوضع النهاري',
+                  style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w700))),
+          Switch(
+            value: isDark,
+            activeColor: AppColors.orange,
+            onChanged: (v) => context.read<ThemeProvider>().setDark(v),
+          ),
+        ],
+      ),
     );
   }
 

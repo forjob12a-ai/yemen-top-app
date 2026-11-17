@@ -12,6 +12,6 @@ class User {
         name: j['name'] ?? '',
         phone: j['phone'] ?? '',
         email: j['email'],
-        walletBalance: (j['wallet_balance'] ?? 0).toDouble(),
+        walletBalance: double.tryParse((j['wallet_balance'] ?? 0).toString()) ?? 0,
       );
 }

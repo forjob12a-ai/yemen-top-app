@@ -23,9 +23,9 @@ class WalletTransaction {
         id: j['id'],
         type: j['type'] ?? '',
         typeLabel: j['type_label'] ?? '',
-        amount: (j['amount'] ?? 0).toDouble(),
+        amount: double.tryParse((j['amount'] ?? 0).toString()) ?? 0,
         isCredit: j['is_credit'] ?? false,
-        balanceAfter: (j['balance_after'] ?? 0).toDouble(),
+        balanceAfter: double.tryParse((j['balance_after'] ?? 0).toString()) ?? 0,
         description: j['description'],
         createdAt: j['created_at'],
       );

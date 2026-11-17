@@ -105,7 +105,7 @@ class _TopupScreenState extends State<TopupScreen> {
                         backgroundColor: AppColors.card,
                         labelStyle: const TextStyle(fontWeight: FontWeight.w800),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30), side: const BorderSide(color: AppColors.line)),
+                            borderRadius: BorderRadius.circular(30), side: BorderSide(color: AppColors.line)),
                       )).toList(),
                     ),
                     const SizedBox(height: 22),
@@ -159,9 +159,9 @@ class _TopupScreenState extends State<TopupScreen> {
                   color: selected ? AppColors.orange : AppColors.muted),
             ]),
             if (selected && m.accountNumber != null) ...[
-              const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(color: AppColors.line)),
+              Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(color: AppColors.line)),
               Row(children: [
-                const Text('الرقم: ', style: TextStyle(color: AppColors.muted, fontSize: 13)),
+                Text('الرقم: ', style: TextStyle(color: AppColors.muted, fontSize: 13)),
                 SelectableText(m.accountNumber!, style: AppTheme.display.copyWith(fontSize: 14)),
               ]),
             ],

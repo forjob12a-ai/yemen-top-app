@@ -7,10 +7,11 @@ import '../../models/offer.dart';
 import '../../services/catalog_service.dart';
 import '../../widgets/common.dart';
 import '../../widgets/product_card.dart';
-import '../../widgets/cart_button.dart';
+import '../../widgets/currency_selector.dart';
 import '../catalog/products_screen.dart';
 import '../catalog/product_detail_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../../widgets/banner_slider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -62,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const NotificationsScreen())),
         ),
-        actions: const [CartButton()],
+        actions: const [CurrencySelector(), SizedBox(width: 4)],
       ),
       body: _loading
           ? const LoadingView()
@@ -74,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      _hero(),
+                      const BannerSlider(),
                       const SizedBox(height: 22),
                       _sectionTitle('الأقسام'),
                       const SizedBox(height: 12),
@@ -95,27 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _hero() => GradientBox(
-        gradient: AppColors.walletGradient,
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('اشحن ألعابك بأمان وسرعة',
-                style: AppTheme.display.copyWith(color: Colors.white, fontSize: 20)),
-            const SizedBox(height: 8),
-            const Text('بطاقات وشحن مباشر بأسعار بالريال اليمني.',
-                style: TextStyle(color: Colors.white70, fontSize: 13)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const ProductsScreen())),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.navy3),
-              child: const Text('تصفّح المتجر'),
-            ),
-          ],
-        ),
-      );
 
   Widget _sectionTitle(String t) => Text(t, style: AppTheme.display.copyWith(fontSize: 18));
 

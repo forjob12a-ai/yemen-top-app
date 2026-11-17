@@ -115,7 +115,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('الكمية: ${item.quantity}${item.playerId != null ? ' · المعرّف: ${item.playerId}' : ''}',
-                    style: const TextStyle(color: AppColors.muted, fontSize: 12.5)),
+                    style: TextStyle(color: AppColors.muted, fontSize: 12.5)),
                 Text(money(item.total), style: const TextStyle(fontWeight: FontWeight.w700)),
               ],
             ),

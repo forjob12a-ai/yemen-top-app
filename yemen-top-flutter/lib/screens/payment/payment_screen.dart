@@ -226,14 +226,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ],
             ),
             if (selected && (m.instructions != null || m.accountNumber != null)) ...[
-              const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(color: AppColors.line)),
+              Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(color: AppColors.line)),
               if (m.instructions != null)
-                Text(m.instructions!, style: const TextStyle(color: AppColors.muted, fontSize: 13, height: 1.6)),
+                Text(m.instructions!, style: TextStyle(color: AppColors.muted, fontSize: 13, height: 1.6)),
               if (m.accountNumber != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Row(children: [
-                    const Text('الرقم: ', style: TextStyle(color: AppColors.muted, fontSize: 13)),
+                    Text('الرقم: ', style: TextStyle(color: AppColors.muted, fontSize: 13)),
                     SelectableText(m.accountNumber!, style: AppTheme.display.copyWith(fontSize: 14)),
                   ]),
                 ),

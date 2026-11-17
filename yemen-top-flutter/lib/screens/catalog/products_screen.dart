@@ -5,7 +5,6 @@ import '../../models/product.dart';
 import '../../services/catalog_service.dart';
 import '../../widgets/common.dart';
 import '../../widgets/product_card.dart';
-import '../../widgets/cart_button.dart';
 import 'product_detail_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
@@ -55,7 +54,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title ?? 'المتجر'), actions: const [CartButton()]),
+      appBar: AppBar(title: Text(widget.title ?? 'المتجر')),
       body: Column(
         children: [
           Padding(
@@ -66,10 +65,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
               onSubmitted: (v) { _search = v.trim(); _load(); },
               decoration: InputDecoration(
                 hintText: 'ابحث عن منتج...',
-                prefixIcon: const Icon(Icons.search, color: AppColors.muted),
+                prefixIcon: Icon(Icons.search, color: AppColors.muted),
                 suffixIcon: _search.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: AppColors.muted),
+                        icon: Icon(Icons.clear, color: AppColors.muted),
                         onPressed: () { _searchCtrl.clear(); _search = ''; _load(); })
                     : null,
               ),
@@ -128,7 +127,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         labelStyle: TextStyle(
             color: active ? Colors.white : AppColors.muted, fontWeight: FontWeight.w700, fontSize: 13),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30), side: const BorderSide(color: AppColors.line)),
+            borderRadius: BorderRadius.circular(30), side: BorderSide(color: AppColors.line)),
       ),
     );
   }

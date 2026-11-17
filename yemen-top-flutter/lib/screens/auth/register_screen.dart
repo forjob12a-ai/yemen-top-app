@@ -87,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 6),
             Text('انضم إلى يمن توب', style: AppTheme.display.copyWith(fontSize: 23)),
             const SizedBox(height: 6),
-            const Text('رقم جوالك هو وسيلة دخولك.', style: TextStyle(color: AppColors.muted)),
+            Text('رقم جوالك هو وسيلة دخولك.', style: TextStyle(color: AppColors.muted)),
             const SizedBox(height: 22),
             _field('الاسم الكامل', _name, hint: 'مثال: محمد أحمد'),
             _field('رقم الجوال', _phone, hint: '7XXXXXXXX', type: TextInputType.phone),

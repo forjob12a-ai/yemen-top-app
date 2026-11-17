@@ -117,7 +117,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   Text(t.typeLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
                   if (t.description != null)
                     Text(t.description!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                        style: TextStyle(color: AppColors.muted, fontSize: 12)),
                 ],
               ),
             ),

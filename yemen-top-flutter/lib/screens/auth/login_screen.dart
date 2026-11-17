@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 10),
             Text('أهلاً بعودتك 👋', style: AppTheme.display.copyWith(fontSize: 24)),
             const SizedBox(height: 6),
-            const Text('أدخل رقم جوالك وكلمة المرور للمتابعة.',
+            Text('أدخل رقم جوالك وكلمة المرور للمتابعة.',
                 style: TextStyle(color: AppColors.muted)),
             const SizedBox(height: 26),
             const Text('رقم الجوال', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
             TextField(
               controller: _phone,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '7XXXXXXXX',
                 prefixIcon: Icon(Icons.phone_outlined, color: AppColors.muted),
               ),
@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('ليس لديك حساب؟', style: TextStyle(color: AppColors.muted)),
+                Text('ليس لديك حساب؟', style: TextStyle(color: AppColors.muted)),
                 TextButton(
                   onPressed: () async {
                     final ok = await Navigator.push<bool>(

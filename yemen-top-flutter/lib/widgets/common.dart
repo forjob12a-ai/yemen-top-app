@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../config/theme.dart';
+import '../providers/app_config_provider.dart';
 
-/// تنسيق المبالغ بالريال اليمني
-String money(num v) => '${NumberFormat.decimalPattern('en').format(v.round())} ﷼';
+/// تنسيق المبالغ: يحوّل من الريال اليمني (العملة الأساسية) إلى العملة المختارة وينسّقها بالرمز.
+/// كل أسعار التطبيق تمرّ عبر هذه الدالة، لذا تغيير العملة ينعكس في كل مكان تلقائياً.
+String money(num v) => AppConfigProvider.activeCurrency.format(v);
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
@@ -36,7 +37,7 @@ class EmptyView extends StatelessWidget {
               if (subtitle != null) ...[
                 const SizedBox(height: 8),
                 Text(subtitle!, textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.muted, fontSize: 14)),
+                    style: TextStyle(color: AppColors.muted, fontSize: 14)),
               ],
               if (action != null) ...[const SizedBox(height: 18), action!],
             ],
@@ -57,9 +58,9 @@ class ErrorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.wifi_off_rounded, size: 44, color: AppColors.muted),
+              Icon(Icons.wifi_off_rounded, size: 44, color: AppColors.muted),
               const SizedBox(height: 14),
-              Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted)),
+              Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.muted)),
               if (onRetry != null) ...[
                 const SizedBox(height: 16),
                 OutlinedButton(onPressed: onRetry, child: const Text('إعادة المحاولة')),

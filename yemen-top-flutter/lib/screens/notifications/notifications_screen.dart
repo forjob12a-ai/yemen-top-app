@@ -123,7 +123,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Text(n.title ?? 'إشعار', style: AppTheme.display.copyWith(fontSize: 15)),
                   if (n.body != null) ...[
                     const SizedBox(height: 3),
-                    Text(n.body!, style: const TextStyle(color: AppColors.muted, fontSize: 13, height: 1.5)),
+                    Text(n.body!, style: TextStyle(color: AppColors.muted, fontSize: 13, height: 1.5)),
                   ],
                 ],
               ),

@@ -52,7 +52,7 @@ class CartScreen extends StatelessWidget {
 
   Widget _summary(BuildContext context, CartProvider cart) => Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.navy,
           border: Border(top: BorderSide(color: AppColors.line)),
         ),
@@ -63,7 +63,7 @@ class CartScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('الإجمالي (${0} قطعة)', style: TextStyle(color: AppColors.muted)),
+                  Text('الإجمالي (${0} قطعة)', style: TextStyle(color: AppColors.muted)),
                   Text(money(cart.subtotal), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 22)),
                 ],
               ),
@@ -109,7 +109,7 @@ class _CartTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.productName, style: AppTheme.display.copyWith(fontSize: 15)),
-                Text(item.packageName, style: const TextStyle(color: AppColors.muted, fontSize: 13)),
+                Text(item.packageName, style: TextStyle(color: AppColors.muted, fontSize: 13)),
                 if (item.playerId != null)
                   Text('${item.playerIdLabel ?? 'المعرّف'}: ${item.playerId}',
                       style: const TextStyle(color: AppColors.royal, fontSize: 12)),

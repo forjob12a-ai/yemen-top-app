@@ -1,4 +1,4 @@
-import '../models/category.dart';
+﻿import '../models/category.dart';
 import '../models/product.dart';
 import '../models/offer.dart';
 import '../models/app_banner.dart';
@@ -33,5 +33,18 @@ class CatalogService {
   Future<List<AppBanner>> banners() async {
     final res = await _api.get('banners');
     return (res['data'] as List).map((b) => AppBanner.fromJson(b)).toList();
+  }
+  // ===== المفضّلة (محمية بتوكن) =====
+  Future<List<Product>> favorites() async {
+    final res = await _api.get('favorites');
+    return (res['data'] as List).map((p) => Product.fromJson(p)).toList();
+  }
+  Future<List<int>> favoriteIds() async {
+    final res = await _api.get('favorites/ids');
+    return (res['data'] as List).map((e) => e as int).toList();
+  }
+  Future<String> toggleFavorite(String slug) async {
+    final res = await _api.post('favorites/$slug/toggle');
+    return (res['status'] ?? '').toString();
   }
 }

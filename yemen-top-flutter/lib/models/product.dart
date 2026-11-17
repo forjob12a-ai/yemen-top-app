@@ -1,4 +1,4 @@
-import 'category.dart';
+﻿import 'category.dart';
 import 'package.dart';
 
 class Product {
@@ -46,7 +46,7 @@ class Product {
         requiresPlayerId: j['requires_player_id'] ?? false,
         playerIdLabel: j['player_id_label'],
         isFeatured: j['is_featured'] ?? false,
-        priceFrom: j['price_from'] != null ? (j['price_from']).toDouble() : null,
+        priceFrom: j['price_from'] != null ? double.tryParse(j['price_from'].toString()) : null,
         category: j['category'] != null && j['category'] is Map
             ? Category.fromJson(j['category'])
             : null,

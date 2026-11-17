@@ -8,7 +8,7 @@ import '../../services/catalog_service.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/common.dart';
 import '../../widgets/cart_button.dart';
-import '../cart/cart_screen.dart';
+
 
 class ProductDetailScreen extends StatefulWidget {
   final String slug;
@@ -113,7 +113,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ]),
         if (p.description != null) ...[
           const SizedBox(height: 14),
-          Text(p.description!, style: const TextStyle(color: AppColors.muted, height: 1.7)),
+          Text(p.description!, style: TextStyle(color: AppColors.muted, height: 1.7)),
         ],
         const SizedBox(height: 20),
         if (p.requiresPlayerId) ...[
@@ -140,7 +140,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, size: 15, color: AppColors.good),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(color: AppColors.muted, fontSize: 12.5)),
+          Text(text, style: TextStyle(color: AppColors.muted, fontSize: 12.5)),
         ]),
       );
 
@@ -179,7 +179,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(money(pkg.price), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 16)),
                   if (pkg.hasDiscount && pkg.originalPrice != null)
                     Text(money(pkg.originalPrice!),
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.muted, fontSize: 11.5, decoration: TextDecoration.lineThrough)),
                 ],
               ),
@@ -203,7 +203,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final price = _selected?.price ?? 0;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.navy,
         border: Border(top: BorderSide(color: AppColors.line)),
       ),

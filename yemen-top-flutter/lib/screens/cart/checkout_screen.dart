@@ -71,7 +71,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.navy, border: Border(top: BorderSide(color: AppColors.line)),
         ),
         child: SafeArea(
@@ -121,7 +121,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(child: Text(l, style: const TextStyle(color: AppColors.muted, fontSize: 13.5))),
+            Expanded(child: Text(l, style: TextStyle(color: AppColors.muted, fontSize: 13.5))),
             const SizedBox(width: 10),
             Text(r, style: const TextStyle(fontWeight: FontWeight.w700)),
           ],
