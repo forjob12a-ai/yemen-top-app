@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
+import '../../models/order_field.dart';
 import '../../models/product.dart';
 import '../../models/package.dart';
 import '../../services/catalog_service.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/common.dart';
 import '../../widgets/cart_button.dart';
-
+import '../../widgets/product_card.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String slug;
@@ -20,7 +20,17 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final _catalog = CatalogService();
+
+  /// معرّف اللاعب القديم: لمنتج لم يرسل الخادم له حقول طلب (خادم أقدم)
   final _playerCtrl = TextEditingController();
+
+  /// حقول الطلب حسب مفتاح الحقل: ما كتبه العميل يبقى عند تبديل الباقة
+  final Map<String, TextEditingController> _ctrls = {};
+  final Map<String, String?> _choice = {};
+  final Map<String, String> _errors = {};
+  bool _prefilled = false;
+  bool _showSecret = false;
+
   bool _loading = true;
   String? _error;
   Product? _product;
@@ -36,6 +46,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void dispose() {
     _playerCtrl.dispose();
+    for (final c in _ctrls.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -45,6 +58,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _product = await _catalog.product(widget.slug);
       final inStock = _product!.packages.where((p) => p.inStock).toList();
       _selected = inStock.isNotEmpty ? inStock.first : null;
+      _prepareFields();
     } catch (_) {
       _error = 'تعذّر تحميل المنتج.';
     } finally {
@@ -52,19 +66,84 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  List<OrderFieldDef> get _fields =>
+      (_product == null || _selected == null) ? const [] : _product!.fieldsFor(_selected!.id);
+
+  /// حقول الباقة المختارة: ما يظهر أول مرة يُعبّأ من آخر طلب للعميل لهذا المنتج (مثل الموقع)،
+  /// وكلمات المرور لا تُعبّأ أبداً (الخادم لا يرسلها أصلاً).
+  void _prepareFields() {
+    final p = _product, pkg = _selected;
+    if (p == null || pkg == null) return;
+    final saved = p.savedFor(pkg.id);
+    for (final f in p.fieldsFor(pkg.id)) {
+      final s = f.isSecret ? null : saved[f.key];
+      if (f.isSelect) {
+        if (!_choice.containsKey(f.key)) {
+          _choice[f.key] = (s != null && f.options.contains(s)) ? s : null;
+          if (_choice[f.key] != null) _prefilled = true;
+        }
+      } else if (!_ctrls.containsKey(f.key)) {
+        _ctrls[f.key] = TextEditingController(text: s ?? '');
+        if (s != null && s.isNotEmpty) _prefilled = true;
+      }
+    }
+  }
+
+  void _selectPackage(Package pkg) => setState(() {
+        _selected = pkg;
+        _errors.clear();
+        _prepareFields();
+      });
+
+  /// يجمع القيم ويفحصها بقواعد الخادم ورسائله؛ null عند وجود خطأ (يظهر تحت كل حقل)
+  Map<String, String>? _collectFields() {
+    final values = <String, String>{};
+    final errors = <String, String>{};
+    for (final f in _fields) {
+      final raw = f.isSelect ? (_choice[f.key] ?? '') : (_ctrls[f.key]?.text ?? '');
+      final v = f.clean(raw);
+      final e = f.validate(v);
+      if (e != null) {
+        errors[f.key] = e;
+        continue;
+      }
+      if (v.trim().isNotEmpty) values[f.key] = v;
+    }
+    setState(() => _errors
+      ..clear()
+      ..addAll(errors));
+    return errors.isEmpty ? values : null;
+  }
+
+  /// سطر البيانات في السلة (كلمة المرور مخفية)
+  String _summary(Map<String, String> values) => _fields
+      .where((f) => values.containsKey(f.key))
+      .map((f) => '${f.label}: ${f.isSecret ? '••••' : values[f.key]}')
+      .join(' · ');
+
   void _addToCart() {
     final p = _product!;
-    if (_selected == null) {
+    final pkg = _selected;
+    if (pkg == null) {
       _snack('اختر باقة أولاً', AppColors.bad);
       return;
     }
-    if (p.requiresPlayerId && _playerCtrl.text.trim().isEmpty) {
-      _snack('أدخل ${p.playerIdLabel ?? 'معرف اللاعب'}', AppColors.bad);
-      return;
+    if (p.hasFieldSets) {
+      final values = _collectFields();
+      if (values == null) {
+        _snack(_errors.values.first, AppColors.bad);
+        return;
+      }
+      context.read<CartProvider>().add(p, pkg, qty: _qty, fields: values, fieldsSummary: _summary(values));
+    } else {
+      if (p.requiresPlayerId && _playerCtrl.text.trim().isEmpty) {
+        _snack('أدخل ${p.playerIdLabel ?? 'معرف اللاعب'}', AppColors.bad);
+        return;
+      }
+      context.read<CartProvider>().add(p, pkg,
+          qty: _qty, playerId: p.requiresPlayerId ? _playerCtrl.text.trim() : null);
     }
-    context.read<CartProvider>().add(p, _selected!,
-        qty: _qty, playerId: p.requiresPlayerId ? _playerCtrl.text.trim() : null);
-    _snack('تمت الإضافة إلى السلة 🛒', AppColors.good);
+    _snack('تمت الإضافة إلى السلة', AppColors.good);
   }
 
   void _snack(String m, Color c) =>
@@ -85,38 +164,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Widget _buildBody() {
     final p = _product!;
+    final fields = _fields;
+    final needsPlayer = p.hasFieldSets ? fields.any((f) => f.isPlayerId) : p.requiresPlayerId;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // الصورة كاملة فوق نسخة مموّهة منها (مثل صفحة المنتج في الموقع)
         ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: AspectRatio(
-            aspectRatio: 16 / 10,
-            child: Container(
-              decoration: const BoxDecoration(gradient: AppColors.royalGradient),
-              child: p.imageUrl != null
-                  ? CachedNetworkImage(imageUrl: p.imageUrl!, fit: BoxFit.cover)
-                  : const Center(child: Icon(Icons.sports_esports, color: Colors.white70, size: 60)),
-            ),
-          ),
+          borderRadius: BorderRadius.circular(16),
+          child: AspectRatio(aspectRatio: 16 / 10, child: ProductArt(imageUrl: p.imageUrl, iconSize: 60)),
         ),
         const SizedBox(height: 16),
         if (p.category != null)
-          Text(p.category!.name, style: const TextStyle(color: AppColors.royal, fontWeight: FontWeight.w800)),
+          Text(p.category!.name, style: TextStyle(color: AppColors.link, fontWeight: FontWeight.w800)),
         const SizedBox(height: 4),
         Text(p.name, style: AppTheme.display.copyWith(fontSize: 22)),
         const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
           _tag(Icons.check_circle_outline, p.deliveryLabel),
           _tag(Icons.shield_outlined, 'دفع آمن'),
-          if (p.requiresPlayerId) _tag(Icons.person_outline, 'يتطلب معرف اللاعب'),
+          if (needsPlayer) _tag(Icons.person_outline, 'يتطلب معرف اللاعب'),
         ]),
         if (p.description != null) ...[
           const SizedBox(height: 14),
           Text(p.description!, style: TextStyle(color: AppColors.muted, height: 1.7)),
         ],
         const SizedBox(height: 20),
-        if (p.requiresPlayerId) ...[
+        if (!p.hasFieldSets && p.requiresPlayerId) ...[
           Text(p.playerIdLabel ?? 'معرف اللاعب (ID)', style: const TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           TextField(
@@ -129,7 +203,90 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Text('اختر الباقة', style: AppTheme.display.copyWith(fontSize: 16)),
         const SizedBox(height: 12),
         ...p.packages.map(_packageTile),
+        // بيانات الشحن بعد الباقة: كل باقة قد يكون لها حقول خاصة بها
+        if (fields.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text('بيانات الشحن', style: AppTheme.display.copyWith(fontSize: 16)),
+          if (_prefilled)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text('عبّأناها من آخر طلب لك لهذا المنتج، تأكد منها قبل الشراء.',
+                  style: TextStyle(color: AppColors.muted, fontSize: 12)),
+            ),
+          const SizedBox(height: 12),
+          ...fields.map(_fieldInput),
+        ],
       ],
+    );
+  }
+
+  Widget _fieldInput(OrderFieldDef f) {
+    final error = _errors[f.key];
+    void clearError() {
+      if (_errors.containsKey(f.key)) setState(() => _errors.remove(f.key));
+    }
+
+    final ltr = f.type == 'digits' || f.type == 'tel' || f.type == 'email';
+    final Widget input = f.isSelect
+        ? DropdownButtonFormField<String>(
+            key: ValueKey('select-${f.key}'),
+            initialValue: _choice[f.key],
+            isExpanded: true,
+            dropdownColor: AppColors.navy,
+            items: f.options.map((o) => DropdownMenuItem(value: o, child: Text(o))).toList(),
+            onChanged: (v) {
+              _choice[f.key] = v;
+              clearError();
+            },
+            decoration: InputDecoration(hintText: f.placeholder ?? 'اختر', errorText: error, errorMaxLines: 2),
+          )
+        : TextField(
+            controller: _ctrls[f.key],
+            keyboardType: switch (f.type) {
+              'digits' => TextInputType.number,
+              'tel' => TextInputType.phone,
+              'email' => TextInputType.emailAddress,
+              _ => TextInputType.text,
+            },
+            textDirection: ltr ? TextDirection.ltr : null,
+            obscureText: f.isSecret && !_showSecret,
+            autocorrect: false,
+            enableSuggestions: !f.isSecret,
+            onChanged: (_) => clearError(),
+            decoration: InputDecoration(
+              hintText: f.placeholder,
+              errorText: error,
+              errorMaxLines: 2,
+              suffixIcon: f.isSecret
+                  ? IconButton(
+                      icon: Icon(_showSecret ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: AppColors.muted),
+                      onPressed: () => setState(() => _showSecret = !_showSecret),
+                    )
+                  : null,
+            ),
+          );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text.rich(
+            TextSpan(text: f.label, children: [
+              if (f.required) TextSpan(text: ' *', style: TextStyle(color: AppColors.bad)),
+            ]),
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          input,
+          if (f.help != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(f.help!, style: TextStyle(color: AppColors.muted, fontSize: 12)),
+            ),
+        ],
+      ),
     );
   }
 
@@ -150,7 +307,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Opacity(
       opacity: out ? 0.5 : 1,
       child: GestureDetector(
-        onTap: out ? null : () => setState(() => _selected = pkg),
+        onTap: out ? null : () => _selectPackage(pkg),
         child: Container(
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
@@ -189,6 +346,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(color: AppColors.good, borderRadius: BorderRadius.circular(20)),
                   child: Text('-${pkg.discountPercent}%',
+                      textDirection: TextDirection.ltr,
                       style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
                 ),
               ],

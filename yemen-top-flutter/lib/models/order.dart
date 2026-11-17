@@ -1,5 +1,20 @@
 import 'order_item.dart';
 
+/// سطر من خط تتبع الطلب (timeline في تفاصيل الطلب): وصف عربي من الخادم ووقته بـ UTC
+class OrderTimelineEntry {
+  final String? at;
+  final String label;
+  final String? toStatus;
+
+  const OrderTimelineEntry({this.at, required this.label, this.toStatus});
+
+  factory OrderTimelineEntry.fromJson(Map<String, dynamic> j) => OrderTimelineEntry(
+        at: j['at']?.toString(),
+        label: (j['label'] ?? '').toString(),
+        toStatus: j['to_status']?.toString(),
+      );
+}
+
 class Order {
   final int id;
   final String orderNumber;
@@ -15,6 +30,8 @@ class Order {
   final int itemsCount;
   final List<OrderItem> items;
   final String? createdAt;
+  final String? couponCode;
+  final List<OrderTimelineEntry> timeline;
 
   Order({
     required this.id,
@@ -31,6 +48,8 @@ class Order {
     this.itemsCount = 0,
     this.items = const [],
     this.createdAt,
+    this.couponCode,
+    this.timeline = const [],
   });
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -50,5 +69,12 @@ class Order {
             ? (j['items'] as List).map((i) => OrderItem.fromJson(i)).toList()
             : const [],
         createdAt: j['created_at'],
+        couponCode: j['coupon_code']?.toString(),
+        timeline: j['timeline'] is List
+            ? (j['timeline'] as List)
+                .whereType<Map>()
+                .map((e) => OrderTimelineEntry.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
+            : const [],
       );
 }

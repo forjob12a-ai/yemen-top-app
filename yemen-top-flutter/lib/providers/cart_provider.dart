@@ -11,6 +11,12 @@ class CartItem {
   final String? imageUrl;
   final String? playerId;
   final String? playerIdLabel;
+
+  /// حقول الطلب {مفتاح: قيمة} كما يطلبها الخادم (items[].fields)
+  final Map<String, String> fields;
+
+  /// سطر يُعرض في السلة (كلمات المرور مخفية)
+  final String? fieldsSummary;
   int qty;
 
   CartItem({
@@ -22,11 +28,19 @@ class CartItem {
     this.imageUrl,
     this.playerId,
     this.playerIdLabel,
+    this.fields = const {},
+    this.fieldsSummary,
     this.qty = 1,
   });
 
   double get total => unitPrice * qty;
-  String get key => '$packageId-${playerId ?? ''}';
+  String get key => keyFor(packageId, playerId, fields);
+
+  /// نفس الباقة بنفس البيانات = سطر واحد تزيد كميته
+  static String keyFor(int packageId, String? playerId, Map<String, String> fields) {
+    final sorted = fields.keys.toList()..sort();
+    return '$packageId-${playerId ?? ''}-${sorted.map((k) => '$k=${fields[k]}').join('&')}';
+  }
 }
 
 class CartProvider extends ChangeNotifier {
@@ -37,8 +51,9 @@ class CartProvider extends ChangeNotifier {
   int get count => _items.fold(0, (s, i) => s + i.qty);
   double get subtotal => _items.fold(0.0, (s, i) => s + i.total);
 
-  void add(Product product, Package package, {int qty = 1, String? playerId}) {
-    final key = '${package.id}-${playerId ?? ''}';
+  void add(Product product, Package package,
+      {int qty = 1, String? playerId, Map<String, String> fields = const {}, String? fieldsSummary}) {
+    final key = CartItem.keyFor(package.id, playerId, fields);
     final existing = _items.where((i) => i.key == key).toList();
     if (existing.isNotEmpty) {
       existing.first.qty += qty;
@@ -52,6 +67,8 @@ class CartProvider extends ChangeNotifier {
         imageUrl: product.imageUrl,
         playerId: playerId,
         playerIdLabel: product.playerIdLabel,
+        fields: Map.unmodifiable(fields),
+        fieldsSummary: fieldsSummary,
         qty: qty,
       ));
     }

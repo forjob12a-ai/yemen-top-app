@@ -22,7 +22,9 @@ class OrderService {
           .map((i) => {
                 'package_id': i.packageId,
                 'qty': i.qty,
-                if (i.playerId != null) 'player_id': i.playerId,
+                // حقول الطلب كما في الموقع؛ player_id القديم فقط لمنتج بلا حقول مربوطة
+                if (i.fields.isNotEmpty) 'fields': i.fields,
+                if (i.fields.isEmpty && i.playerId != null) 'player_id': i.playerId,
               })
           .toList(),
       if (note != null && note.isNotEmpty) 'note': note,

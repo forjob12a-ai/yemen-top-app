@@ -13,6 +13,7 @@ import '../catalog/product_detail_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../offers/offers_screen.dart';
 import '../../widgets/banner_slider.dart';
+import '../../widgets/home_extras.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -76,11 +77,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
+                      // ترتيب الرئيسية مثل الموقع: الإعلانات، البانر، الأقسام، المزايا، عدّاد الطلبات المسلّمة
+                      const NoticeBars(),
                       const BannerSlider(),
                       const SizedBox(height: 22),
                       _sectionTitle('الأقسام'),
                       const SizedBox(height: 12),
                       _categoriesRow(),
+                      const SizedBox(height: 22),
+                      const TrustStrip(),
+                      const SizedBox(height: 12),
+                      const DeliveredCounter(),
                       if (_offers.isNotEmpty) ...[
                         const SizedBox(height: 24),
                         // العروض خرجت من الشريط السفلي (مثل الموقع)، وصفحتها الكاملة من هنا

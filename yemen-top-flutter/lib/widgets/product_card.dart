@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../config/theme.dart';
@@ -76,22 +77,17 @@ class _ProductCardState extends State<ProductCard> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Container(
-                    decoration: const BoxDecoration(gradient: AppColors.royalGradient),
-                    child: p.imageUrl != null
-                        ? CachedNetworkImage(imageUrl: p.imageUrl!, fit: BoxFit.cover)
-                        : const Center(child: Icon(Icons.sports_esports, color: Colors.white70, size: 40)),
-                  ),
+                  ProductArt(imageUrl: p.imageUrl),
                   if (p.isFeatured)
                     Positioned(
                       top: 10, right: 10,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                            gradient: AppColors.orangeGradient,
+                            color: AppColors.orange,
                             borderRadius: BorderRadius.circular(30)),
-                        child: const Text('مميّز',
-                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
+                        child: Text('مميّز',
+                            style: TextStyle(color: AppColors.onAccent, fontSize: 11, fontWeight: FontWeight.w800)),
                       ),
                     ),
                   Positioned(
@@ -145,10 +141,10 @@ class _ProductCardState extends State<ProductCard> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                         decoration: BoxDecoration(
-                            gradient: AppColors.orangeGradient,
-                            borderRadius: BorderRadius.circular(11)),
-                        child: const Text('اطلب',
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+                            color: AppColors.orange,
+                            borderRadius: BorderRadius.circular(30)),
+                        child: Text('اطلب',
+                            style: TextStyle(color: AppColors.onAccent, fontSize: 12, fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),
@@ -158,6 +154,37 @@ class _ProductCardState extends State<ProductCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// صورة المنتج كما في الموقع: الصورة كاملة فوق نسخة مموّهة منها تملأ الإطار،
+/// فلا تُقص الصور المربعة ولا القديمة بنسبة 3:2. بلا صورة: خلفية زرقاء وأيقونة.
+class ProductArt extends StatelessWidget {
+  final String? imageUrl;
+  final double iconSize;
+  const ProductArt({super.key, this.imageUrl, this.iconSize = 40});
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl;
+    if (url == null) {
+      return Container(
+        decoration: const BoxDecoration(gradient: AppColors.royalGradient),
+        child: Center(child: Icon(Icons.sports_esports, color: Colors.white70, size: iconSize)),
+      );
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ColoredBox(color: AppColors.navy3),
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: CachedNetworkImage(imageUrl: url, fit: BoxFit.cover),
+        ),
+        ColoredBox(color: Colors.black.withValues(alpha: 0.12)),
+        CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
+      ],
     );
   }
 }

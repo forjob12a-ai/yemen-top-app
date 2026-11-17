@@ -6,6 +6,15 @@ import '../providers/app_config_provider.dart';
 /// كل أسعار التطبيق تمرّ عبر هذه الدالة، لذا تغيير العملة ينعكس في كل مكان تلقائياً.
 String money(num v) => AppConfigProvider.activeCurrency.format(v);
 
+/// وقت من الخادم (ISO-8601 بـ UTC) بتوقيت اليمن (UTC+3 طوال السنة) وبصيغة الموقع: 2026/11/17 14:05
+String localTime(String? iso) {
+  final t = iso == null ? null : DateTime.tryParse(iso);
+  if (t == null) return '';
+  final y = t.toUtc().add(const Duration(hours: 3));
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${y.year}/${two(y.month)}/${two(y.day)} ${two(y.hour)}:${two(y.minute)}';
+}
+
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
   @override

@@ -110,9 +110,12 @@ class _CartTile extends StatelessWidget {
               children: [
                 Text(item.productName, style: AppTheme.display.copyWith(fontSize: 15)),
                 Text(item.packageName, style: TextStyle(color: AppColors.muted, fontSize: 13)),
-                if (item.playerId != null)
+                // بيانات الشحن (حقول الطلب)، أو معرّف اللاعب القديم
+                if ((item.fieldsSummary ?? '').isNotEmpty)
+                  Text(item.fieldsSummary!, style: TextStyle(color: AppColors.link, fontSize: 12))
+                else if (item.playerId != null)
                   Text('${item.playerIdLabel ?? 'المعرّف'}: ${item.playerId}',
-                      style: const TextStyle(color: AppColors.royal, fontSize: 12)),
+                      style: TextStyle(color: AppColors.link, fontSize: 12)),
                 const SizedBox(height: 4),
                 Text(money(item.total), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 14)),
               ],

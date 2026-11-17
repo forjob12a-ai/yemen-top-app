@@ -4,6 +4,9 @@ class OrderItem {
   final String packageName;
   final String? playerId;
   final int quantity;
+
+  /// عدد وحدات باقة الكمية (الكوينز)، وnull للباقات الثابتة
+  final int? units;
   final double unitPrice;
   final double total;
   final String status;
@@ -16,6 +19,7 @@ class OrderItem {
     required this.packageName,
     this.playerId,
     required this.quantity,
+    this.units,
     required this.unitPrice,
     required this.total,
     required this.status,
@@ -29,6 +33,7 @@ class OrderItem {
         packageName: j['package_name'] ?? '',
         playerId: j['player_id'],
         quantity: j['quantity'] ?? 1,
+        units: j['units'] == null ? null : int.tryParse(j['units'].toString()),
         unitPrice: double.tryParse((j['unit_price'] ?? 0).toString()) ?? 0,
         total: double.tryParse((j['total'] ?? 0).toString()) ?? 0,
         status: j['status'] ?? 'pending',

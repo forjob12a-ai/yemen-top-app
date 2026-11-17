@@ -7,6 +7,7 @@ import '../services/app_config_service.dart';
 /// يحمل العملات والعملة المختارة وبيانات التواصل، ويحفظ اختيار العملة محلياً.
 class AppConfigProvider extends ChangeNotifier {
   static const _prefsKey = 'selected_currency_code';
+  static const _dismissedKey = 'dismissed_notices';
   final _service = AppConfigService();
 
   /// العملة الفعّالة التي تقرأها دالة money() في كل التطبيق (ثابتة عامة).
@@ -15,11 +16,21 @@ class AppConfigProvider extends ChangeNotifier {
   List<Currency> _currencies = const [Currency.fallback];
   Currency _selected = Currency.fallback;
   ContactInfo _contact = const ContactInfo();
+  List<SiteNotice> _notices = const [];
+  Set<int> _dismissed = {};
+  String? _deliveredCounter;
   bool _loaded = false;
 
   List<Currency> get currencies => _currencies;
   Currency get selected => _selected;
   ContactInfo get contact => _contact;
+
+  /// إعلانات الموقع الظاهرة الآن، بلا ما أغلقه العميل (يُحفظ على الجهاز كما يحفظه الموقع في كوكي)
+  List<SiteNotice> get notices =>
+      _notices.where((n) => !(n.dismissible && _dismissed.contains(n.id))).toList();
+
+  /// نص عدّاد «طلبات تم تسليمها»، أو null حين لا يُعرض (مطفأ أو دون الحد في الإعدادات)
+  String? get deliveredCounter => _deliveredCounter;
   bool get loaded => _loaded;
 
   /// تُستدعى مرة واحدة عند إقلاع التطبيق (من شاشة البداية).
@@ -28,8 +39,14 @@ class AppConfigProvider extends ChangeNotifier {
       final config = await _service.fetch();
       if (config.currencies.isNotEmpty) _currencies = config.currencies;
       _contact = config.contact;
+      _notices = config.notices;
+      _deliveredCounter = config.deliveredCounter;
 
       final prefs = await SharedPreferences.getInstance();
+      _dismissed = (prefs.getStringList(_dismissedKey) ?? const [])
+          .map(int.tryParse)
+          .whereType<int>()
+          .toSet();
       final savedCode = prefs.getString(_prefsKey);
 
       _selected = _pickCurrency(savedCode, config.defaultCurrency);
@@ -59,6 +76,17 @@ class AppConfigProvider extends ChangeNotifier {
         byCode(defaultCode) ??
         _currencies.firstWhere((c) => c.isDefault,
             orElse: () => _currencies.first);
+  }
+
+  /// إغلاق إعلان: لا يظهر مرة أخرى على هذا الجهاز
+  Future<void> dismissNotice(SiteNotice notice) async {
+    if (!notice.dismissible) return;
+    _dismissed = {..._dismissed, notice.id};
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_dismissedKey, _dismissed.map((id) => '$id').toList());
+    } catch (_) {}
   }
 
   /// تغيير العملة المختارة وحفظها محلياً (يُعاد بناء الأسعار في كل التطبيق).
