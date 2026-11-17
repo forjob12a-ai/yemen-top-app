@@ -1,0 +1,29 @@
+name: yemen_top
+description: تطبيق يمن توب للخدمات الرقمية — شحن الألعاب والبطاقات.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  http: ^1.2.0                 # الاتصال بالـ API
+  provider: ^6.1.2             # إدارة الحالة
+  shared_preferences: ^2.2.3   # تخزين التوكن محلياً
+  intl: ^0.19.0                # تنسيق الأرقام والتواريخ
+  google_fonts: ^6.2.1         # خطوط Cairo / Tajawal
+  cached_network_image: ^3.3.1 # صور المنتجات
+  # إشعارات Push (اختياري — يتطلب إعداد Firebase):
+  # firebase_core: ^2.31.0
+  # firebase_messaging: ^14.9.0
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

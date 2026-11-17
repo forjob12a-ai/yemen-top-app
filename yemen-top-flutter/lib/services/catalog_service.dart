@@ -1,0 +1,37 @@
+import '../models/category.dart';
+import '../models/product.dart';
+import '../models/offer.dart';
+import '../models/app_banner.dart';
+import 'api_client.dart';
+
+class CatalogService {
+  final _api = ApiClient.instance;
+
+  Future<List<Category>> categories() async {
+    final res = await _api.get('categories');
+    return (res['data'] as List).map((c) => Category.fromJson(c)).toList();
+  }
+
+  Future<List<Product>> products({String? categorySlug, String? search}) async {
+    final res = await _api.get('products', query: {
+      if (categorySlug != null) 'category': categorySlug,
+      if (search != null && search.isNotEmpty) 'q': search,
+    });
+    return (res['data'] as List).map((p) => Product.fromJson(p)).toList();
+  }
+
+  Future<Product> product(String slug) async {
+    final res = await _api.get('products/$slug');
+    return Product.fromJson(res['data'] ?? res);
+  }
+
+  Future<List<Offer>> offers() async {
+    final res = await _api.get('offers');
+    return (res['data'] as List).map((o) => Offer.fromJson(o)).toList();
+  }
+
+  Future<List<AppBanner>> banners() async {
+    final res = await _api.get('banners');
+    return (res['data'] as List).map((b) => AppBanner.fromJson(b)).toList();
+  }
+}
