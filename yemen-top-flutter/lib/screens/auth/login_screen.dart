@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
+import '../../widgets/google_sign_in_button.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -37,6 +38,24 @@ class _LoginScreenState extends State<LoginScreen> {
       _snack(e.firstError);
     } catch (_) {
       _snack('تعذّر الاتصال بالخادم');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  /// الدخول بحساب جوجل: بلا كتابة بريد أو كلمة مرور
+  Future<void> _google() async {
+    final navigator = Navigator.of(context);
+    setState(() => _loading = true);
+    try {
+      final ok = await context.read<AuthProvider>().signInWithGoogle();
+      if (ok) navigator.pop(true);
+    } on ApiException catch (e) {
+      _snack(e.firstError);
+    } on StateError catch (e) {
+      _snack(e.message);
+    } catch (_) {
+      _snack('تعذّر تسجيل الدخول عبر جوجل. حاول مرة أخرى أو ادخل بالبريد.');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -93,15 +112,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   : const Text('دخول'),
             ),
             const SizedBox(height: 18),
+            GoogleSignInButton(onPressed: _loading ? null : _google),
+            const SizedBox(height: 18),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('ليس لديك حساب؟', style: TextStyle(color: AppColors.muted)),
                 TextButton(
                   onPressed: () async {
+                    final navigator = Navigator.of(context);
                     final ok = await Navigator.push<bool>(
                         context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
-                    if (ok == true && mounted) Navigator.pop(context, true);
+                    if (ok == true && mounted) navigator.pop(true);
                   },
                   child: const Text('أنشئ حساباً', style: TextStyle(color: AppColors.orange, fontWeight: FontWeight.w800)),
                 ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
+import '../../widgets/google_sign_in_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -75,6 +76,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  /// الدخول أو التسجيل بحساب جوجل: بلا كتابة بريد أو كلمة مرور
+  Future<void> _google() async {
+    final navigator = Navigator.of(context);
+    setState(() => _loading = true);
+    try {
+      final ok = await context.read<AuthProvider>().signInWithGoogle();
+      if (ok) navigator.pop(true);
+    } on ApiException catch (e) {
+      _snack(e.firstError);
+    } on StateError catch (e) {
+      _snack(e.message);
+    } catch (_) {
+      _snack('تعذّر تسجيل الدخول عبر جوجل. حاول مرة أخرى أو أنشئ الحساب بالبريد.');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   void _snack(String m) => ScaffoldMessenger.of(context)
       .showSnackBar(SnackBar(content: Text(m), backgroundColor: AppColors.bad));
 
@@ -135,6 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : const Text('إنشاء الحساب'),
             ),
+            GoogleSignInButton(onPressed: _loading ? null : _google),
           ],
         ),
       ),

@@ -40,6 +40,13 @@ class AuthService {
     return User.fromJson(res['user']);
   }
 
+  /// الدخول بحساب جوجل: يُرسل رمز الهوية (id_token) والخادم يتحقق منه عند جوجل
+  Future<User> loginWithGoogle(String idToken) async {
+    final res = await _api.post('auth/google', {'id_token': idToken});
+    await _api.setToken(res['token']);
+    return User.fromJson(res['user']);
+  }
+
   Future<User> me() async {
     final res = await _api.get('me');
     return User.fromJson(res['data'] ?? res);

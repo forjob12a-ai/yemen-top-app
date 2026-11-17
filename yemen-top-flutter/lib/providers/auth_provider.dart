@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
+import '../services/google_sign_in_service.dart';
 
 enum AuthStatus { unknown, authenticated, guest }
 
@@ -35,6 +36,15 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login(String identifier, String password) async {
     _user = await _auth.login(identifier: identifier, password: password);
     _set(AuthStatus.authenticated, _user);
+  }
+
+  /// الدخول بحساب جوجل. يرجع false إن ألغى المستخدم النافذة
+  Future<bool> signInWithGoogle() async {
+    final idToken = await GoogleSignInService.idToken();
+    if (idToken == null) return false;
+    _user = await _auth.loginWithGoogle(idToken);
+    _set(AuthStatus.authenticated, _user);
+    return true;
   }
 
   /// يرجع true إن أُرسل رابط تأكيد البريد (الشراء يحتاج البريد المؤكَّد)

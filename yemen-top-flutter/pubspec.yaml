@@ -19,6 +19,7 @@ dependencies:
   google_fonts: ^6.2.1         # ط®ط·ظˆط· Cairo / Tajawal
   cached_network_image: ^3.3.1 # طµظˆط± ط§ظ„ظ…ظ†طھط¬ط§طھ
   url_launcher: ^6.3.0
+  google_sign_in: ^7.2.0       # الدخول بحساب جوجل
   lottie: ^3.1.0         # ظپطھط­ ط±ظˆط§ط¨ط· ظˆط§طھط³ط§ط¨ ظˆط§ظ„ط±ظˆط§ط¨ط· ط§ظ„ط®ط§ط±ط¬ظٹط©
   # ط¥ط´ط¹ط§ط±ط§طھ Push (ط§ط®طھظٹط§ط±ظٹ â€” ظٹطھط·ظ„ط¨ ط¥ط¹ط¯ط§ط¯ Firebase):
   # firebase_core: ^2.31.0
