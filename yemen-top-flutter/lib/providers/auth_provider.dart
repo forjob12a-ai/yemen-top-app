@@ -31,23 +31,26 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> login(String phone, String password) async {
-    _user = await _auth.login(phone: phone, password: password);
+  /// identifier: البريد أو رقم الجوال
+  Future<void> login(String identifier, String password) async {
+    _user = await _auth.login(identifier: identifier, password: password);
     _set(AuthStatus.authenticated, _user);
   }
 
-  Future<void> register({
+  /// يرجع true إن أُرسل رابط تأكيد البريد (الشراء يحتاج البريد المؤكَّد)
+  Future<bool> register({
     required String name,
-    required String phone,
-    String? email,
+    required String email,
+    String? phone,
     required String password,
     required String passwordConfirmation,
   }) async {
-    _user = await _auth.register(
-      name: name, phone: phone, email: email,
+    final result = await _auth.register(
+      name: name, email: email, phone: phone,
       password: password, passwordConfirmation: passwordConfirmation,
     );
-    _set(AuthStatus.authenticated, _user);
+    _set(AuthStatus.authenticated, result.user);
+    return result.emailVerificationSent;
   }
 
   Future<void> logout() async {

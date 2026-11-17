@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (_phone.text.trim().isEmpty || _password.text.isEmpty) {
-      _snack('أدخل رقم الجوال وكلمة المرور');
+      _snack('أدخل بريدك أو رقم جوالك وكلمة المرور');
       return;
     }
     setState(() => _loading = true);
@@ -57,17 +57,17 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 10),
             Text('أهلاً بعودتك 👋', style: AppTheme.display.copyWith(fontSize: 24)),
             const SizedBox(height: 6),
-            Text('أدخل رقم جوالك وكلمة المرور للمتابعة.',
+            Text('أدخل بريدك أو رقم جوالك وكلمة المرور للمتابعة.',
                 style: TextStyle(color: AppColors.muted)),
             const SizedBox(height: 26),
-            const Text('رقم الجوال', style: TextStyle(fontWeight: FontWeight.w700)),
+            const Text('البريد أو رقم الجوال', style: TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             TextField(
               controller: _phone,
-              keyboardType: TextInputType.phone,
+              keyboardType: TextInputType.text,
               decoration: InputDecoration(
-                hintText: '7XXXXXXXX',
-                prefixIcon: Icon(Icons.phone_outlined, color: AppColors.muted),
+                hintText: 'name@example.com أو 7XXXXXXXX',
+                prefixIcon: Icon(Icons.person_outline, color: AppColors.muted),
               ),
             ),
             const SizedBox(height: 16),
