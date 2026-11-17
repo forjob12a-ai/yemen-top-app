@@ -16,18 +16,21 @@ class OrderService {
   }
 
   /// إتمام الشراء من عناصر السلة
-  Future<Order> checkout(List<CartItem> items, {String? note}) async {
+  /// couponCode: كود الخصم (اختياري)؛ يُفحص ويُحسب الخصم في الخادم، والخطأ يعود تحت coupon_code
+  Future<Order> checkout(List<CartItem> items, {String? note, String? couponCode}) async {
     final res = await _api.post('orders', {
       'items': items
           .map((i) => {
                 'package_id': i.packageId,
-                'qty': i.qty,
+                'qty': i.isQuantity ? 1 : i.qty,
+                if (i.units != null) 'units': i.units,
                 // حقول الطلب كما في الموقع؛ player_id القديم فقط لمنتج بلا حقول مربوطة
                 if (i.fields.isNotEmpty) 'fields': i.fields,
                 if (i.fields.isEmpty && i.playerId != null) 'player_id': i.playerId,
               })
           .toList(),
       if (note != null && note.isNotEmpty) 'note': note,
+      if (couponCode != null && couponCode.isNotEmpty) 'coupon_code': couponCode,
     });
     return Order.fromJson(res['data'] ?? res);
   }

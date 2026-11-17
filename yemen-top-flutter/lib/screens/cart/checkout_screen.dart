@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/package.dart';
 import '../../providers/cart_provider.dart';
 import '../../services/order_service.dart';
 import '../../services/api_client.dart';
@@ -17,24 +18,33 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _orders = OrderService();
   final _noteCtrl = TextEditingController();
+
+  /// كود الخصم: يُفحص ويُحسب في الخادم عند تأكيد الطلب (مثل الموقع)، ولا يُقبل أي خصم من التطبيق
+  final _couponCtrl = TextEditingController();
+  String? _couponError;
   bool _loading = false;
 
   @override
   void dispose() {
     _noteCtrl.dispose();
+    _couponCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _placeOrder() async {
     final cart = context.read<CartProvider>();
-    setState(() => _loading = true);
+    setState(() { _loading = true; _couponError = null; });
     try {
-      final order = await _orders.checkout(cart.items, note: _noteCtrl.text.trim());
+      final order = await _orders.checkout(cart.items,
+          note: _noteCtrl.text.trim(), couponCode: _couponCtrl.text.trim());
       cart.clear();
       if (!mounted) return;
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (_) => PaymentScreen(order: order)));
     } on ApiException catch (e) {
+      // كوبون غير صالح (منتهٍ، استُنفد، حد أدنى، مستوى لا يسمح...): الرسالة تحت الحقل ولا يُنشأ طلب
+      final coupon = e.errors?['coupon_code'];
+      if (coupon is List && coupon.isNotEmpty && mounted) setState(() => _couponError = coupon.first.toString());
       _snack(e.firstError);
     } catch (_) {
       _snack('تعذّر إنشاء الطلب');
@@ -61,7 +71,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ]),
           const SizedBox(height: 14),
           _card('عناصر الطلب (${cart.count})',
-              cart.items.map((i) => _row('${i.productName} — ${i.packageName} ×${i.qty}', money(i.total))).toList()),
+              cart.items
+                  .map((i) => _row(
+                      // باقة الكمية: عدد الوحدات بدل ×الكمية
+                      '${i.productName} — ${i.isQuantity ? '${Package.fmtInt(i.units!)} ${i.unitLabel ?? ''}' : '${i.packageName} ×${i.qty}'}',
+                      money(i.total)))
+                  .toList()),
+          const SizedBox(height: 14),
+          const Text('كود الخصم (اختياري)', style: TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _couponCtrl,
+            textCapitalization: TextCapitalization.characters,
+            textDirection: TextDirection.ltr,
+            autocorrect: false,
+            enableSuggestions: false,
+            // إعادة البناء مع كل حرف: عنوان الإجمالي يتغيّر حين يُكتب كوبون، والخطأ يختفي
+            onChanged: (_) => setState(() => _couponError = null),
+            decoration: InputDecoration(
+              hintText: 'مثل EID10',
+              prefixIcon: Icon(Icons.local_offer_outlined, color: AppColors.muted),
+              errorText: _couponError,
+              errorMaxLines: 2,
+              helperText: 'يُطبَّق عند تأكيد الطلب، وترى المبلغ بعد الخصم قبل الدفع.',
+              helperMaxLines: 2,
+            ),
+          ),
           const SizedBox(height: 14),
           const Text('ملاحظة (اختياري)', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
@@ -76,12 +111,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         child: SafeArea(
           top: false,
+          // min: بدونها يأخذ الشريط السفلي الشاشة كلها ويخفي صفحة الطلب
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('الإجمالي', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text(_couponCtrl.text.trim().isEmpty ? 'الإجمالي' : 'الإجمالي قبل الخصم',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                   Text(money(cart.subtotal), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 22)),
                 ],
               ),

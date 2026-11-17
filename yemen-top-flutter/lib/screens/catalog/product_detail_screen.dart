@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/order_field.dart';
 import '../../models/product.dart';
 import '../../models/package.dart';
+import '../../services/api_client.dart';
 import '../../services/catalog_service.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/common.dart';
@@ -31,6 +33,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _prefilled = false;
   bool _showSecret = false;
 
+  /// باقة الكمية (الكوينز): العدد يكتبه العميل، والسعر من الخادم (لا يُحسب في التطبيق)
+  final _unitsCtrl = TextEditingController();
+  double? _quotePrice;
+  String? _unitsError;
+  bool _quoting = false;
+  Timer? _debounce;
+  int _quoteSeq = 0;
+
   bool _loading = true;
   String? _error;
   Product? _product;
@@ -46,6 +56,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void dispose() {
     _playerCtrl.dispose();
+    _unitsCtrl.dispose();
+    _debounce?.cancel();
     for (final c in _ctrls.values) {
       c.dispose();
     }
@@ -59,6 +71,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       final inStock = _product!.packages.where((p) => p.inStock).toList();
       _selected = inStock.isNotEmpty ? inStock.first : null;
       _prepareFields();
+      _prepareUnits();
     } catch (_) {
       _error = 'تعذّر تحميل المنتج.';
     } finally {
@@ -89,11 +102,77 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _selectPackage(Package pkg) => setState(() {
-        _selected = pkg;
-        _errors.clear();
-        _prepareFields();
-      });
+  void _selectPackage(Package pkg) {
+    setState(() {
+      _selected = pkg;
+      _errors.clear();
+      _prepareFields();
+    });
+    _prepareUnits();
+  }
+
+  int get _units => int.tryParse(_unitsCtrl.text) ?? 0;
+
+  /// عند اختيار باقة كمية: العدد الأدنى إن لم يكن العدد الحالي صالحاً لها، ثم السعر من الخادم
+  void _prepareUnits() {
+    final pkg = _selected;
+    _debounce?.cancel();
+    if (pkg == null || !pkg.isQuantity) {
+      setState(() { _quotePrice = null; _unitsError = null; _quoting = false; });
+      return;
+    }
+    if (_unitsCtrl.text.isEmpty || pkg.checkUnits(_units) != null) {
+      _unitsCtrl.text = '${pkg.minUnits ?? 1}';
+    }
+    _requestQuote();
+  }
+
+  static const _arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+
+  /// أرقام فقط (والعربية تتحول إنجليزية)، ثم فحص فوري وسعر بعد توقف الكتابة
+  void _onUnitsChanged(String raw) {
+    final clean = raw.split('').map((c) {
+      final i = _arabicDigits.indexOf(c);
+      return i >= 0 ? '$i' : c;
+    }).join().replaceAll(RegExp(r'[^0-9]'), '');
+    final cut = clean.length > 10 ? clean.substring(0, 10) : clean;
+    if (cut != raw) {
+      _unitsCtrl.value = TextEditingValue(text: cut, selection: TextSelection.collapsed(offset: cut.length));
+    }
+    final error = _selected?.checkUnits(_units);
+    _debounce?.cancel();
+    setState(() { _unitsError = error; _quotePrice = null; _quoting = error == null; });
+    if (error == null) _debounce = Timer(const Duration(milliseconds: 350), _requestQuote);
+  }
+
+  void _setUnits(int v) {
+    _unitsCtrl.text = '$v';
+    _onUnitsChanged('$v');
+  }
+
+  Future<void> _requestQuote() async {
+    final pkg = _selected;
+    if (pkg == null || !pkg.isQuantity) return;
+    final units = _units;
+    final error = pkg.checkUnits(units);
+    if (error != null) {
+      setState(() { _unitsError = error; _quotePrice = null; _quoting = false; });
+      return;
+    }
+    final seq = ++_quoteSeq;
+    setState(() { _quoting = true; _unitsError = null; });
+    try {
+      final price = await _catalog.quote(pkg.id, units);
+      if (!mounted || seq != _quoteSeq) return; // رد قديم بعد تغيير العدد
+      setState(() { _quotePrice = price; _quoting = false; });
+    } on ApiException catch (e) {
+      if (!mounted || seq != _quoteSeq) return;
+      setState(() { _unitsError = e.firstError; _quoting = false; });
+    } catch (_) {
+      if (!mounted || seq != _quoteSeq) return;
+      setState(() { _unitsError = 'تعذّر حساب السعر، حاول مرة أخرى.'; _quoting = false; });
+    }
+  }
 
   /// يجمع القيم ويفحصها بقواعد الخادم ورسائله؛ null عند وجود خطأ (يظهر تحت كل حقل)
   Map<String, String>? _collectFields() {
@@ -128,20 +207,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _snack('اختر باقة أولاً', AppColors.bad);
       return;
     }
+    if (pkg.isQuantity && (_unitsError != null || _quotePrice == null)) {
+      _snack(_unitsError ?? 'انتظر حتى يُحسب السعر', AppColors.bad);
+      return;
+    }
+    final units = pkg.isQuantity ? _units : null;
+    final unitPrice = pkg.isQuantity ? _quotePrice : null;
     if (p.hasFieldSets) {
       final values = _collectFields();
       if (values == null) {
         _snack(_errors.values.first, AppColors.bad);
         return;
       }
-      context.read<CartProvider>().add(p, pkg, qty: _qty, fields: values, fieldsSummary: _summary(values));
+      context.read<CartProvider>().add(p, pkg,
+          qty: _qty, fields: values, fieldsSummary: _summary(values), units: units, unitPrice: unitPrice);
     } else {
       if (p.requiresPlayerId && _playerCtrl.text.trim().isEmpty) {
         _snack('أدخل ${p.playerIdLabel ?? 'معرف اللاعب'}', AppColors.bad);
         return;
       }
       context.read<CartProvider>().add(p, pkg,
-          qty: _qty, playerId: p.requiresPlayerId ? _playerCtrl.text.trim() : null);
+          qty: _qty,
+          playerId: p.requiresPlayerId ? _playerCtrl.text.trim() : null,
+          units: units,
+          unitPrice: unitPrice);
     }
     _snack('تمت الإضافة إلى السلة', AppColors.good);
   }
@@ -202,7 +291,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ],
         Text('اختر الباقة', style: AppTheme.display.copyWith(fontSize: 16)),
         const SizedBox(height: 12),
-        ...p.packages.map(_packageTile),
+        ...p.packages.map((pkg) => _packageTile(pkg, hasFixed: p.packages.any((x) => !x.isQuantity))),
+        if (_selected?.isQuantity == true) _quantityBox(_selected!),
         // بيانات الشحن بعد الباقة: كل باقة قد يكون لها حقول خاصة بها
         if (fields.isNotEmpty) ...[
           const SizedBox(height: 10),
@@ -301,7 +391,86 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ]),
       );
 
-  Widget _packageTile(Package pkg) {
+  /// صندوق الكمية كما في الموقع: العدد والوحدة، والسعر من الخادم، وكميات سريعة، والحدود أو الخطأ تحته
+  Widget _quantityBox(Package pkg) {
+    final min = pkg.minUnits ?? 1;
+    final max = pkg.maxUnits;
+    final step = pkg.stepUnits ?? 1;
+    final hint = 'من ${Package.fmtInt(min)}${max != null ? ' إلى ${Package.fmtInt(max)}' : ''} ${pkg.label}'
+        '${step > 1 ? '، بخطوات ${Package.fmtInt(step)}' : ''}.';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.navy,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('أدخل الكمية', style: AppTheme.display.copyWith(fontSize: 15)),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _unitsCtrl,
+                  keyboardType: TextInputType.number,
+                  textDirection: TextDirection.ltr,
+                  onChanged: _onUnitsChanged,
+                  style: AppTheme.display.copyWith(fontSize: 17),
+                  // اسم الوحدة في طرف الحقل، بعيداً عن الرقم
+                  decoration: InputDecoration(
+                    errorText: _unitsError,
+                    errorMaxLines: 3,
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Center(widthFactor: 1, child: Text(pkg.label, style: TextStyle(color: AppColors.muted))),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('السعر', style: TextStyle(color: AppColors.muted, fontSize: 12)),
+                  const SizedBox(height: 4),
+                  _quoting
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(_quotePrice != null ? money(_quotePrice!) : '—',
+                          style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 18)),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final v in pkg.presets)
+                ChoiceChip(
+                  label: Text(Package.fmtInt(v)),
+                  selected: _units == v,
+                  onSelected: (_) => _setUnits(v),
+                  shape: const StadiumBorder(),
+                  showCheckmark: false,
+                ),
+            ],
+          ),
+          if (_unitsError == null) ...[
+            const SizedBox(height: 8),
+            Text(hint, style: TextStyle(color: AppColors.muted, fontSize: 12)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _packageTile(Package pkg, {bool hasFixed = true}) {
     final selected = _selected?.id == pkg.id;
     final out = !pkg.inStock;
     return Opacity(
@@ -322,7 +491,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(pkg.name, style: AppTheme.display.copyWith(fontSize: 15.5)),
+                    // باقة الكمية بجانب الباقات الثابتة اسمها «كمية مخصصة» كما في الموقع
+                    Row(children: [
+                      if (pkg.isQuantity) ...[
+                        Icon(Icons.edit_outlined, size: 16, color: AppColors.muted),
+                        const SizedBox(width: 6),
+                      ],
+                      Flexible(
+                        child: Text(pkg.isQuantity && hasFixed ? 'كمية مخصصة' : pkg.name,
+                            style: AppTheme.display.copyWith(fontSize: 15.5)),
+                      ),
+                    ]),
                     if (out) Padding(
                       padding: const EdgeInsets.only(top: 3),
                       child: Text('غير متوفّر حالياً', style: TextStyle(color: AppColors.bad, fontSize: 12)),
@@ -333,7 +512,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(money(pkg.price), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 16)),
+                  Text('${pkg.isQuantity ? 'من ' : ''}${money(pkg.price)}',
+                      style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 16)),
                   if (pkg.hasDiscount && pkg.originalPrice != null)
                     Text(money(pkg.originalPrice!),
                         style: TextStyle(
@@ -358,7 +538,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _bottomBar() {
-    final price = _selected?.price ?? 0;
+    final quantity = _selected?.isQuantity == true;
+    final price = quantity ? (_quotePrice ?? 0) : (_selected?.price ?? 0) * _qty;
+    final ready = !quantity || (_quotePrice != null && !_quoting && _unitsError == null);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
@@ -369,8 +551,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         top: false,
         child: Row(
           children: [
-            // عدّاد الكمية
-            Container(
+            // عدّاد الكمية للباقات الثابتة فقط (باقة الكمية سطرها واحد بعدد الوحدات)
+            if (!quantity) Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.line)),
               child: Row(
@@ -381,12 +563,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            if (!quantity) const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: _addToCart,
+                onPressed: ready ? _addToCart : null,
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
-                label: Text('أضف للسلة · ${money(price * _qty)}'),
+                label: Text(ready ? 'أضف للسلة · ${money(price)}' : 'أضف للسلة'),
               ),
             ),
           ],

@@ -69,7 +69,8 @@ class _WalletScreenState extends State<WalletScreen> {
                               await Navigator.push(context, MaterialPageRoute(builder: (_) => const TopupScreen()));
                               _load();
                             },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.navy3),
+                            // نص الزر الأبيض بلون الهوية حتى يُقرأ في الوضع الفاتح أيضاً
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.brand),
                             icon: const Icon(Icons.add, size: 18),
                             label: const Text('شحن المحفظة'),
                           ),

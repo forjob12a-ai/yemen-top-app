@@ -133,6 +133,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                                 const Text('المطلوب', style: TextStyle(color: Colors.white70, fontSize: 13)),
                                 Text(money(widget.order.total), style: AppTheme.display.copyWith(color: Colors.white, fontSize: 20)),
+                                // خصم الكوبون كما حسبه الخادم عند إنشاء الطلب
+                                if (widget.order.discount > 0)
+                                  Text('بعد خصم ${money(widget.order.discount)}${widget.order.couponCode != null ? ' (${widget.order.couponCode})' : ''}',
+                                      style: const TextStyle(color: Colors.white70, fontSize: 11.5)),
                               ]),
                             ],
                           ),
@@ -142,7 +146,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: _submitting ? null : _payWallet,
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.navy3),
+                                // زر أبيض فوق بطاقة المحفظة الزرقاء: نصه بلون الهوية في الوضعين (navy3 فاتح في الوضع الفاتح فلا يُقرأ)
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.brand),
                                 child: const Text('ادفع الآن من المحفظة'),
                               ),
                             )

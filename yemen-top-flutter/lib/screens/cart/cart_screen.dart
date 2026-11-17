@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/package.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/common.dart';
 import '../auth/login_screen.dart';
@@ -63,7 +64,7 @@ class CartScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('الإجمالي (${0} قطعة)', style: TextStyle(color: AppColors.muted)),
+                  Text('الإجمالي (${cart.count} قطعة)', style: TextStyle(color: AppColors.muted)),
                   Text(money(cart.subtotal), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 22)),
                 ],
               ),
@@ -109,7 +110,9 @@ class _CartTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.productName, style: AppTheme.display.copyWith(fontSize: 15)),
-                Text(item.packageName, style: TextStyle(color: AppColors.muted, fontSize: 13)),
+                // باقة الكمية: العدد ووحدته (مثل «2,500 كوين») بدل اسم الباقة وحده
+                Text(item.isQuantity ? '${item.packageName} · ${Package.fmtInt(item.units!)} ${item.unitLabel ?? ''}' : item.packageName,
+                    style: TextStyle(color: AppColors.muted, fontSize: 13)),
                 // بيانات الشحن (حقول الطلب)، أو معرّف اللاعب القديم
                 if ((item.fieldsSummary ?? '').isNotEmpty)
                   Text(item.fieldsSummary!, style: TextStyle(color: AppColors.link, fontSize: 12))
@@ -123,7 +126,8 @@ class _CartTile extends StatelessWidget {
           ),
           Column(
             children: [
-              Row(
+              // الكمية لا تتغير لسطر باقة الكمية (عدد الوحدات يحدَّد في صفحة المنتج)
+              if (!item.isQuantity) Row(
                 children: [
                   _qtyBtn(Icons.remove, () => cart.updateQty(item, item.qty - 1)),
                   Padding(

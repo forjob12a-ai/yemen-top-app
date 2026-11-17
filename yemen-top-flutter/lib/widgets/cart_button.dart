@@ -21,7 +21,9 @@ class CartButton extends StatelessWidget {
         if (count > 0)
           Positioned(
             right: 6, top: 6,
-            child: Container(
+            // الشارة لا تبتلع الضغطة: الضغط عليها يفتح السلة مثل الأيقونة
+            child: IgnorePointer(
+              child: Container(
               padding: const EdgeInsets.all(4),
               constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               decoration: BoxDecoration(
@@ -29,6 +31,7 @@ class CartButton extends StatelessWidget {
               child: Text('$count',
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+              ),
             ),
           ),
       ],

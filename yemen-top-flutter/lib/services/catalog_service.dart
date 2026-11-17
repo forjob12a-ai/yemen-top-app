@@ -1,4 +1,4 @@
-﻿import '../models/category.dart';
+import '../models/category.dart';
 import '../models/product.dart';
 import '../models/offer.dart';
 import '../models/app_banner.dart';
@@ -13,7 +13,9 @@ class CatalogService {
   }
 
   Future<List<Product>> products({String? categorySlug, String? search}) async {
+    // quantity=1: التطبيق يدعم باقات الكمية (الكوينز)، فتظهر له مثل الموقع
     final res = await _api.get('products', query: {
+      'quantity': 1,
       if (categorySlug != null) 'category': categorySlug,
       if (search != null && search.isNotEmpty) 'q': search,
     });
@@ -21,8 +23,15 @@ class CatalogService {
   }
 
   Future<Product> product(String slug) async {
-    final res = await _api.get('products/$slug');
+    final res = await _api.get('products/$slug', query: {'quantity': 1});
     return Product.fromJson(res['data'] ?? res);
+  }
+
+  /// سعر باقة الكمية لعدد معيّن من الخادم (محرك التسعير نفسه الذي يسعّر الطلب)؛
+  /// عدد غير صالح يرجع ApiException برسالة الخادم
+  Future<double> quote(int packageId, int units) async {
+    final res = await _api.get('packages/$packageId/quote', query: {'units': units});
+    return double.tryParse('${res['price']}') ?? 0;
   }
 
   Future<List<Offer>> offers() async {

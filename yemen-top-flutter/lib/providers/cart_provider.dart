@@ -17,6 +17,10 @@ class CartItem {
 
   /// سطر يُعرض في السلة (كلمات المرور مخفية)
   final String? fieldsSummary;
+
+  /// عدد وحدات باقة الكمية (الكوينز)؛ السطر عندها كمية 1 دائماً كما في الخادم
+  final int? units;
+  final String? unitLabel;
   int qty;
 
   CartItem({
@@ -30,16 +34,20 @@ class CartItem {
     this.playerIdLabel,
     this.fields = const {},
     this.fieldsSummary,
+    this.units,
+    this.unitLabel,
     this.qty = 1,
   });
 
+  bool get isQuantity => units != null;
+
   double get total => unitPrice * qty;
-  String get key => keyFor(packageId, playerId, fields);
+  String get key => keyFor(packageId, playerId, fields, units);
 
   /// نفس الباقة بنفس البيانات = سطر واحد تزيد كميته
-  static String keyFor(int packageId, String? playerId, Map<String, String> fields) {
+  static String keyFor(int packageId, String? playerId, Map<String, String> fields, [int? units]) {
     final sorted = fields.keys.toList()..sort();
-    return '$packageId-${playerId ?? ''}-${sorted.map((k) => '$k=${fields[k]}').join('&')}';
+    return '$packageId-${units ?? ''}-${playerId ?? ''}-${sorted.map((k) => '$k=${fields[k]}').join('&')}';
   }
 }
 
@@ -52,9 +60,19 @@ class CartProvider extends ChangeNotifier {
   double get subtotal => _items.fold(0.0, (s, i) => s + i.total);
 
   void add(Product product, Package package,
-      {int qty = 1, String? playerId, Map<String, String> fields = const {}, String? fieldsSummary}) {
-    final key = CartItem.keyFor(package.id, playerId, fields);
+      {int qty = 1,
+      String? playerId,
+      Map<String, String> fields = const {},
+      String? fieldsSummary,
+      int? units,
+      double? unitPrice}) {
+    final key = CartItem.keyFor(package.id, playerId, fields, units);
     final existing = _items.where((i) => i.key == key).toList();
+    // باقة الكمية: نفس العدد ونفس البيانات سطر واحد بكمية 1 (لا تُضاعف)
+    if (existing.isNotEmpty && units != null) {
+      notifyListeners();
+      return;
+    }
     if (existing.isNotEmpty) {
       existing.first.qty += qty;
     } else {
@@ -63,13 +81,16 @@ class CartProvider extends ChangeNotifier {
         productId: product.id,
         productName: product.name,
         packageName: package.name,
-        unitPrice: package.price,
+        // سعر العرض في السلة؛ الخادم يعيد التسعير عند الطلب
+        unitPrice: unitPrice ?? package.price,
         imageUrl: product.imageUrl,
         playerId: playerId,
         playerIdLabel: product.playerIdLabel,
         fields: Map.unmodifiable(fields),
         fieldsSummary: fieldsSummary,
-        qty: qty,
+        units: units,
+        unitLabel: units != null ? package.label : null,
+        qty: units != null ? 1 : qty,
       ));
     }
     notifyListeners();
@@ -78,7 +99,7 @@ class CartProvider extends ChangeNotifier {
   void updateQty(CartItem item, int qty) {
     if (qty <= 0) {
       _items.remove(item);
-    } else {
+    } else if (!item.isQuantity) {
       item.qty = qty.clamp(1, 99);
     }
     notifyListeners();
