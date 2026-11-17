@@ -22,6 +22,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   /// كود الخصم: يُفحص ويُحسب في الخادم عند تأكيد الطلب (مثل الموقع)، ولا يُقبل أي خصم من التطبيق
   final _couponCtrl = TextEditingController();
   String? _couponError;
+
+  /// معاينة الخصم بعد «تطبيق» (من الخادم)، وملاحظة حين لا يدعمها الخادم بعد
+  CouponPreview? _preview;
+  String? _couponNote;
+  bool _checking = false;
   bool _loading = false;
 
   @override
@@ -53,6 +58,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  /// «تطبيق»: الخصم والإجمالي من الخادم قبل التأكيد (مثل الموقع). عند التأكيد يُفحص الكود مرة أخرى
+  Future<void> _applyCoupon() async {
+    final code = _couponCtrl.text.trim();
+    if (code.isEmpty) {
+      setState(() => _couponError = 'اكتب كود الخصم.');
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    final items = context.read<CartProvider>().items;
+    setState(() { _checking = true; _couponError = null; _couponNote = null; _preview = null; });
+    try {
+      final preview = await _orders.couponCheck(items, code);
+      if (mounted) setState(() => _preview = preview);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      if (e.statusCode == 404) {
+        // خادم لم يُحدَّث بعد: الكود يبقى ويُطبَّق عند تأكيد الطلب
+        setState(() => _couponNote = 'معاينة الخصم غير متاحة الآن، وسيُطبَّق الكود عند تأكيد الطلب.');
+      } else {
+        final c = e.errors?['coupon_code'];
+        setState(() => _couponError = (c is List && c.isNotEmpty) ? c.first.toString() : e.firstError);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _couponError = 'تعذّر فحص الكود، حاول مرة أخرى.');
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
+  }
+
+  void _removeCoupon() => setState(() {
+        _couponCtrl.clear();
+        _preview = null;
+        _couponError = null;
+        _couponNote = null;
+      });
+
   void _snack(String m) => ScaffoldMessenger.of(context)
       .showSnackBar(SnackBar(content: Text(m), backgroundColor: AppColors.bad));
 
@@ -80,23 +121,60 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SizedBox(height: 14),
           const Text('كود الخصم (اختياري)', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          TextField(
-            controller: _couponCtrl,
-            textCapitalization: TextCapitalization.characters,
-            textDirection: TextDirection.ltr,
-            autocorrect: false,
-            enableSuggestions: false,
-            // إعادة البناء مع كل حرف: عنوان الإجمالي يتغيّر حين يُكتب كوبون، والخطأ يختفي
-            onChanged: (_) => setState(() => _couponError = null),
-            decoration: InputDecoration(
-              hintText: 'مثل EID10',
-              prefixIcon: Icon(Icons.local_offer_outlined, color: AppColors.muted),
-              errorText: _couponError,
-              errorMaxLines: 2,
-              helperText: 'يُطبَّق عند تأكيد الطلب، وترى المبلغ بعد الخصم قبل الدفع.',
-              helperMaxLines: 2,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _couponCtrl,
+                  textCapitalization: TextCapitalization.characters,
+                  textDirection: TextDirection.ltr,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  // إعادة البناء مع كل حرف: عنوان الإجمالي يتغيّر، والخطأ يختفي، والمعاينة تسقط إن تغيّر الكود
+                  onChanged: (v) => setState(() {
+                    _couponError = null;
+                    _couponNote = null;
+                    if (_preview != null && v.trim().toUpperCase() != _preview!.code.toUpperCase()) _preview = null;
+                  }),
+                  onSubmitted: (_) => _applyCoupon(),
+                  decoration: InputDecoration(
+                    hintText: 'مثل EID10',
+                    prefixIcon: Icon(Icons.local_offer_outlined, color: AppColors.muted),
+                    errorText: _couponError,
+                    errorMaxLines: 2,
+                    helperText: _preview != null ? null : (_couponNote ?? 'اضغط «تطبيق» لترى الخصم قبل تأكيد الطلب.'),
+                    helperMaxLines: 2,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: _checking || _loading ? null : _applyCoupon,
+                  child: _checking
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('تطبيق'),
+                ),
+              ),
+            ],
           ),
+          if (_preview != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle_rounded, size: 18, color: AppColors.good),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text('تم تطبيق ${_preview!.code}: خصم ${money(_preview!.discount)}',
+                        style: TextStyle(color: AppColors.good, fontWeight: FontWeight.w700, fontSize: 13)),
+                  ),
+                  TextButton(onPressed: _removeCoupon, child: const Text('إزالة')),
+                ],
+              ),
+            ),
           const SizedBox(height: 14),
           const Text('ملاحظة (اختياري)', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
@@ -115,12 +193,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // بعد «تطبيق»: المجموع والخصم والإجمالي كما حسبها الخادم
+              if (_preview != null) ...[
+                _sumRow('المجموع', money(_preview!.subtotal)),
+                _sumRow('الخصم (${_preview!.code})', '- ${money(_preview!.discount)}', color: AppColors.good),
+                const SizedBox(height: 4),
+              ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(_couponCtrl.text.trim().isEmpty ? 'الإجمالي' : 'الإجمالي قبل الخصم',
+                  Text(
+                      _preview != null
+                          ? 'الإجمالي بعد الخصم'
+                          : (_couponCtrl.text.trim().isEmpty ? 'الإجمالي' : 'الإجمالي قبل الخصم'),
                       style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                  Text(money(cart.subtotal), style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 22)),
+                  Text(money(_preview?.total ?? cart.subtotal),
+                      style: AppTheme.display.copyWith(color: AppColors.gold, fontSize: 22)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -139,6 +227,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
+
+  Widget _sumRow(String label, String value, {Color? color}) => Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TextStyle(color: AppColors.muted, fontSize: 13.5)),
+            Text(value, textDirection: TextDirection.ltr, style: TextStyle(color: color ?? AppColors.text, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      );
 
   Widget _card(String title, List<Widget> children) => Container(
         padding: const EdgeInsets.all(16),
