@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
                     if (ok == true && mounted) navigator.pop(true);
                   },
-                  child: const Text('أنشئ حساباً', style: TextStyle(color: AppColors.orange, fontWeight: FontWeight.w800)),
+                  child: Text('أنشئ حساباً', style: TextStyle(color: AppColors.orange, fontWeight: FontWeight.w800)),
                 ),
               ],
             ),

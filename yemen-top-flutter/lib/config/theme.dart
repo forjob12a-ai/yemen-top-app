@@ -1,61 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// هوية يمن توب — لوحة ألوان قابلة للتبديل (ليلي/نهاري).
-/// ثوابت الهوية لا تتغير بين الوضعين وتبقى const،
-/// أما ألوان الخلفيات والنصوص فمتغيّرة ويبدّلها AppColors.apply().
+/// هوية يمن توب — نفس ألوان الموقع (public/css/theme-v2.css) وبنفس الأسماء:
+/// orange = لون الإجراء الرئيسي (أخضر)، royal = الأزرق، navy = البطاقات والأسطح، ink = خلفية الصفحة.
+/// ما يختلف بين الوضعين متغيّر ويبدّله AppColors.apply()، وما يثبت في الوضعين const.
 class AppColors {
-  // ===== ثوابت الهوية (لا تتغير بين الوضعين) =====
-  static const orange = Color(0xFFFE7A39);
-  static const orangeDeep = Color(0xFFE85F1F);
-  static const royal = Color(0xFF5570E4);
-  static const royalDeep = Color(0xFF3752AD);
-  static const gold = Color(0xFFF6C44E);
-  static const good = Color(0xFF37D6A0);
-  static const bad = Color(0xFFFF6B6B);
+  // ===== ثابتة في الوضعين =====
+  /// الشريط العلوي والسفلي (كحلي ثابت مثل الموقع: --yt2-bar)
+  static const bar = Color(0xFF000628);
 
-  static const orangeGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [orange, orangeDeep],
-  );
+  /// عناصر الشريط السفلي غير النشطة (أبيض 72%)
+  static const barText = Color(0xB8FFFFFF);
+
+  /// العنصر النشط في الشريط، وأي نص أخضر فوق الشريط الكحلي
+  static const barActive = Color(0xFF47FF91);
+
+  /// بطاقة المحفظة والدخول (--yt2-brand)
+  static const brand = Color(0xFF0277BD);
+  static const royal = Color(0xFF0277BD);
+  static const royalDeep = Color(0xFF01579B);
   static const royalGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [royal, royalDeep],
+    colors: [Color(0xFF0288D1), royalDeep],
   );
 
-  // ===== لوحة الوضع الليلي (نفس القيم الأصلية حرفيًا) =====
-  static const _dInk = Color(0xFF0B0916);
-  static const _dNavy = Color(0xFF160733);
-  static const _dNavy2 = Color(0xFF1E0E44);
-  static const _dNavy3 = Color(0xFF2A1559);
-  static const _dText = Color(0xFFF4F0FB);
-  static const _dMuted = Color(0xFFA99FC6);
-  static const _dLine = Color(0x14FFFFFF);
+  // ===== الوضع الداكن (:root في theme-v2.css) =====
+  static const _dInk = Color(0xFF000628);
+  static const _dNavy = Color(0xFF0B1137);
+  static const _dNavy2 = Color(0xFF000628);
+  static const _dNavy3 = Color(0xFF1A2150);
+  static const _dText = Color(0xFFFFFFFF);
+  static const _dMuted = Color(0xFFA6ABCB);
+  static const _dLine = Color(0x1FFFFFFF);
   static const _dCard = Color(0x0DFFFFFF);
-  static const _dWallet = LinearGradient(
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-    colors: [royalDeep, _dNavy3, orangeDeep],
-  );
+  static const _dField = Color(0x14FFFFFF);
+  static const _dOrange = Color(0xFF4CAF50);
+  static const _dOrangeDeep = Color(0xFF43A047);
+  static const _dOnAccent = Color(0xFF000628);
+  static const _dLink = Color(0xFF4FC3F7);
+  static const _dGold = Color(0xFFF6C44E);
+  static const _dGood = Color(0xFF37D6A0);
+  static const _dBad = Color(0xFFFF6B6B);
 
-  // ===== لوحة الوضع النهاري =====
-  static const _lInk = Color(0xFFF6F4FB);
+  // ===== الوضع الفاتح ([data-theme="light"] في theme-v2.css) =====
+  static const _lInk = Color(0xFFF1F1F1);
   static const _lNavy = Color(0xFFFFFFFF);
-  static const _lNavy2 = Color(0xFFF1EDF9);
-  static const _lNavy3 = Color(0xFFE7E0F5);
-  static const _lText = Color(0xFF1A1230);
-  static const _lMuted = Color(0xFF6B6386);
-  static const _lLine = Color(0x14000000);
+  static const _lNavy2 = Color(0xFFF1F1F1);
+  static const _lNavy3 = Color(0xFFE6E7EE);
+  static const _lText = Color(0xFF23233C);
+  static const _lMuted = Color(0xFF5D5D78);
+  static const _lLine = Color(0x1F000000);
   static const _lCard = Color(0x08000000);
-  static const _lWallet = LinearGradient(
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-    colors: [Color(0xFFE3DCFA), Color(0xFFF0E4F7), Color(0xFFFBE3D4)],
-  );
+  static const _lField = Color(0x0F000000);
+  static const _lOrange = Color(0xFF2E7D32);
+  static const _lOrangeDeep = Color(0xFF27692B);
+  static const _lOnAccent = Color(0xFFFFFFFF);
+  static const _lLink = Color(0xFF0277BD);
+  static const _lGold = Color(0xFF8F5D00);
+  static const _lGood = Color(0xFF0B7A53);
+  static const _lBad = Color(0xFFC62F2F);
 
-  // ===== الحالة الحالية (تبدأ ليلية للحفاظ على السلوك القديم) =====
+  // ===== الحالة الحالية (تبدأ داكنة، ويضبطها ThemeProvider عند التشغيل) =====
   static bool isDark = true;
   static Color ink = _dInk;
   static Color navy = _dNavy;
@@ -65,7 +72,30 @@ class AppColors {
   static Color muted = _dMuted;
   static Color line = _dLine;
   static Color card = _dCard;
-  static LinearGradient walletGradient = _dWallet;
+  static Color field = _dField;
+
+  /// لون الإجراء الرئيسي (أخضر الموقع)
+  static Color orange = _dOrange;
+  static Color orangeDeep = _dOrangeDeep;
+
+  /// لون النص فوق الأخضر (كحلي في الداكن، أبيض في الفاتح — --on-accent)
+  static Color onAccent = _dOnAccent;
+
+  /// الروابط والأزرار النصية
+  static Color link = _dLink;
+  static Color gold = _dGold;
+  static Color good = _dGood;
+  static Color bad = _dBad;
+  static LinearGradient orangeGradient = _gradient(_dOrange, _dOrangeDeep);
+
+  /// بطاقة المحفظة: أزرق الهوية في الوضعين (نصها أبيض)
+  static const LinearGradient walletGradient = royalGradient;
+
+  static LinearGradient _gradient(Color a, Color b) => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [a, b],
+      );
 
   /// تبديل اللوحة بالكامل. تُستدعى تلقائيًا عند بناء الثيم.
   static void apply(bool dark) {
@@ -78,7 +108,17 @@ class AppColors {
     muted = dark ? _dMuted : _lMuted;
     line = dark ? _dLine : _lLine;
     card = dark ? _dCard : _lCard;
-    walletGradient = dark ? _dWallet : _lWallet;
+    field = dark ? _dField : _lField;
+    orange = dark ? _dOrange : _lOrange;
+    orangeDeep = dark ? _dOrangeDeep : _lOrangeDeep;
+    onAccent = dark ? _dOnAccent : _lOnAccent;
+    link = dark ? _dLink : _lLink;
+    gold = dark ? _dGold : _lGold;
+    good = dark ? _dGood : _lGood;
+    bad = dark ? _dBad : _lBad;
+    orangeGradient = dark
+        ? _gradient(_dOrange, _dOrangeDeep)
+        : _gradient(_lOrange, _lOrangeDeep);
   }
 }
 
@@ -86,65 +126,133 @@ class AppTheme {
   static ThemeData get dark => _build(true);
   static ThemeData get light => _build(false);
 
+  /// خط الموقع: Tajawal لكل النصوص
+  static String? get _font => GoogleFonts.tajawal().fontFamily;
+
   static ThemeData _build(bool dark) {
     AppColors.apply(dark);
-    final base = dark
-        ? ThemeData.dark(useMaterial3: true)
-        : ThemeData.light(useMaterial3: true);
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: dark ? Brightness.dark : Brightness.light,
+      fontFamily: _font,
+    );
+    final pill = WidgetStateProperty.all<OutlinedBorder>(const StadiumBorder());
+
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.ink,
       primaryColor: AppColors.orange,
       colorScheme: base.colorScheme.copyWith(
         primary: AppColors.orange,
+        onPrimary: AppColors.onAccent,
         secondary: AppColors.royal,
+        onSecondary: Colors.white,
         surface: AppColors.navy,
+        onSurface: AppColors.text,
         error: AppColors.bad,
       ),
-      textTheme: GoogleFonts.cairoTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.tajawalTextTheme(base.textTheme).apply(
         bodyColor: AppColors.text,
         displayColor: AppColors.text,
       ),
+
+      // الشريط العلوي كحلي ثابت في الوضعين مثل الموقع، ونصه وأيقوناته بيضاء
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.ink,
+        backgroundColor: AppColors.bar,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+          statusBarColor: AppColors.bar,
+        ),
         titleTextStyle: GoogleFonts.tajawal(
-          color: AppColors.text,
+          color: Colors.white,
           fontSize: 19,
           fontWeight: FontWeight.w800,
         ),
-        iconTheme: IconThemeData(color: AppColors.text),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actionsIconTheme: const IconThemeData(color: Colors.white),
       ),
+
+      // الشريط السفلي: كحلي، والعنصر النشط أخضر داخل كبسولة خفيفة
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.bar,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: AppColors.barActive.withValues(alpha: 0.15),
+        iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.barActive
+                  : AppColors.barText,
+            )),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final on = states.contains(WidgetState.selected);
+          return GoogleFonts.tajawal(
+            fontSize: 12,
+            fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+            color: on ? AppColors.barActive : AppColors.barText,
+          );
+        }),
+      ),
+
       cardColor: AppColors.navy,
       dividerColor: AppColors.line,
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: AppColors.orange),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.navy,
+        surfaceTintColor: Colors.transparent,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.navy,
+        surfaceTintColor: Colors.transparent,
+      ),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.card,
+        fillColor: AppColors.field,
         hintStyle: TextStyle(color: AppColors.muted),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: AppColors.line),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: AppColors.line),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
-          borderSide: const BorderSide(color: AppColors.orange, width: 1.6),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.orange, width: 1.6),
         ),
       ),
+
+      // أزرار بيضاوية مثل الموقع: الإجراء الرئيسي أخضر ونصه --on-accent
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.orange,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          foregroundColor: AppColors.onAccent,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+          shape: const StadiumBorder(),
           textStyle:
               GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          shape: pill,
+          foregroundColor: WidgetStateProperty.all(AppColors.text),
+          side: WidgetStateProperty.all(BorderSide(color: AppColors.line)),
+          textStyle: WidgetStateProperty.all(
+              GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w700)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.link,
+          textStyle:
+              GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ),
     );

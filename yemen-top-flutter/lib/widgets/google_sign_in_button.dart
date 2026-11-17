@@ -30,14 +30,23 @@ class GoogleSignInButton extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
+        // زر جوجل بشكل الموقع (.yt2-gbtn): أبيض بيضاوي بحد رمادي، في الوضعين
         OutlinedButton.icon(
           onPressed: onPressed,
           icon: const Text(
             'G',
             style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Color(0xFF4285F4)),
           ),
-          label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+          label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(50),
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF3C4043),
+            disabledBackgroundColor: Colors.white,
+            disabledForegroundColor: const Color(0x803C4043),
+            side: const BorderSide(color: Color(0xFFDADCE0)),
+            shape: const StadiumBorder(),
+          ),
         ),
       ],
     );

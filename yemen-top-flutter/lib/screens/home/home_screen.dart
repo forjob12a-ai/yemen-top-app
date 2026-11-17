@@ -11,6 +11,7 @@ import '../../widgets/currency_selector.dart';
 import '../catalog/products_screen.dart';
 import '../catalog/product_detail_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../offers/offers_screen.dart';
 import '../../widgets/banner_slider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -82,7 +83,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       _categoriesRow(),
                       if (_offers.isNotEmpty) ...[
                         const SizedBox(height: 24),
-                        _sectionTitle('العروض الخاصة 🔥'),
+                        // العروض خرجت من الشريط السفلي (مثل الموقع)، وصفحتها الكاملة من هنا
+                        Row(
+                          children: [
+                            Expanded(child: _sectionTitle('العروض الخاصة 🔥')),
+                            TextButton(
+                              onPressed: () => Navigator.push(context,
+                                  MaterialPageRoute(builder: (_) => const OffersScreen())),
+                              child: const Text('عرض الكل'),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 12),
                         _offersRow(),
                       ],
@@ -156,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   o.imageUrl != null
                       ? CachedNetworkImage(imageUrl: o.imageUrl!, fit: BoxFit.cover)
-                      : Container(decoration: const BoxDecoration(gradient: AppColors.orangeGradient)),
+                      : Container(decoration: BoxDecoration(gradient: AppColors.orangeGradient)),
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(

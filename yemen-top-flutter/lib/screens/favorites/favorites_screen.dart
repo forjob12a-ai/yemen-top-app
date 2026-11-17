@@ -101,11 +101,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               child: (p.imageUrl != null && p.imageUrl!.isNotEmpty)
                   ? Image.network(p.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const ColoredBox(
-                          color: Color(0x22FE7A39),
+                      errorBuilder: (_, __, ___) => ColoredBox(
+                          color: AppColors.orange.withValues(alpha: 0.13),
                           child: Icon(Icons.image, color: AppColors.orange)))
-                  : const ColoredBox(
-                      color: Color(0x22FE7A39),
+                  : ColoredBox(
+                      color: AppColors.orange.withValues(alpha: 0.13),
                       child: Icon(Icons.videogame_asset, color: AppColors.orange)),
             ),
             Expanded(
@@ -122,7 +122,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     const SizedBox(height: 6),
                     if (p.priceFrom != null)
                       Text('يبدأ من ${p.priceFrom!.toStringAsFixed(0)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.orange)),
                   ],
                 ),

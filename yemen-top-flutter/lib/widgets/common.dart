@@ -10,7 +10,7 @@ class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
   @override
   Widget build(BuildContext context) =>
-      const Center(child: CircularProgressIndicator(color: AppColors.orange));
+      Center(child: CircularProgressIndicator(color: AppColors.orange));
 }
 
 class EmptyView extends StatelessWidget {

@@ -21,23 +21,24 @@ class CurrencySelector extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            // الزر في الشريط العلوي الكحلي في الوضعين، فألوانه فاتحة دائماً
+            color: const Color(0x1FFFFFFF),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: AppColors.line),
+            border: Border.all(color: const Color(0x38FFFFFF)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.currency_exchange_rounded,
-                  size: 15, color: AppColors.gold),
+                  size: 15, color: Color(0xFFF6C44E)),
               const SizedBox(width: 6),
               Text(cfg.selected.code,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.text)),
-              Icon(Icons.keyboard_arrow_down_rounded,
-                  size: 18, color: AppColors.muted),
+                      color: Colors.white)),
+              const Icon(Icons.keyboard_arrow_down_rounded,
+                  size: 18, color: Colors.white70),
             ],
           ),
         ),
@@ -70,7 +71,7 @@ class CurrencySelector extends StatelessWidget {
                   width: 30,
                   child: Text(c.symbol,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 20, color: AppColors.gold)),
+                      style: TextStyle(fontSize: 20, color: AppColors.gold)),
                 ),
                 title: Text(c.name,
                     style: TextStyle(
@@ -78,7 +79,7 @@ class CurrencySelector extends StatelessWidget {
                 subtitle: Text(c.code,
                     style: TextStyle(color: AppColors.muted, fontSize: 12)),
                 trailing: isSelected
-                    ? const Icon(Icons.check_circle_rounded, color: AppColors.good)
+                    ? Icon(Icons.check_circle_rounded, color: AppColors.good)
                     : Icon(Icons.circle_outlined, color: AppColors.muted),
               );
             }),

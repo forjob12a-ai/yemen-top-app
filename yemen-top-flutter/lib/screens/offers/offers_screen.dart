@@ -40,11 +40,11 @@ class _OffersScreenState extends State<OffersScreen> {
             if (snap.hasError) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 120),
+                children: [
+                  const SizedBox(height: 120),
                   Icon(Icons.wifi_off, size: 56, color: AppColors.orange),
-                  SizedBox(height: 12),
-                  Center(child: Text('تعذّر جلب العروض — اسحب للأسفل للمحاولة مجدداً')),
+                  const SizedBox(height: 12),
+                  const Center(child: Text('تعذّر جلب العروض — اسحب للأسفل للمحاولة مجدداً')),
                 ],
               );
             }
@@ -52,11 +52,11 @@ class _OffersScreenState extends State<OffersScreen> {
             if (offers.isEmpty) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 120),
+                children: [
+                  const SizedBox(height: 120),
                   Icon(Icons.local_offer_outlined, size: 56, color: AppColors.orange),
-                  SizedBox(height: 12),
-                  Center(child: Text('لا توجد عروض حالياً — ترقّبونا 🔥')),
+                  const SizedBox(height: 12),
+                  const Center(child: Text('لا توجد عروض حالياً — ترقّبونا 🔥')),
                 ],
               );
             }
@@ -83,8 +83,8 @@ class _OffersScreenState extends State<OffersScreen> {
                           child: Image.network(
                             o.imageUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const ColoredBox(
-                              color: Color(0x22FE7A39),
+                            errorBuilder: (_, __, ___) => ColoredBox(
+                              color: AppColors.orange.withValues(alpha: 0.13),
                               child: Icon(Icons.local_offer, size: 48, color: AppColors.orange),
                             ),
                           ),

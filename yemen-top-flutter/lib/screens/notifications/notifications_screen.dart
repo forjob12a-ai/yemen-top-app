@@ -69,7 +69,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         title: const Text('الإشعارات'),
         actions: [
           if (authed && _items.isNotEmpty)
-            TextButton(onPressed: _markAll, child: const Text('تعليم الكل', style: TextStyle(color: AppColors.orange))),
+            TextButton(onPressed: _markAll, child: const Text('تعليم الكل', style: TextStyle(color: AppColors.barActive))),
         ],
       ),
       body: !authed
@@ -130,7 +130,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
             if (!n.isRead)
               Container(width: 9, height: 9, margin: const EdgeInsets.only(top: 4),
-                  decoration: const BoxDecoration(color: AppColors.orange, shape: BoxShape.circle)),
+                  decoration: BoxDecoration(color: AppColors.orange, shape: BoxShape.circle)),
           ],
         ),
       ),

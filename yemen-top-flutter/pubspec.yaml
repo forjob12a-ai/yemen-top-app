@@ -1,5 +1,5 @@
-﻿name: yemen_top
-description: طھط·ط¨ظٹظ‚ ظٹظ…ظ† طھظˆط¨ ظ„ظ„ط®ط¯ظ…ط§طھ ط§ظ„ط±ظ‚ظ…ظٹط© â€” ط´ط­ظ† ط§ظ„ط£ظ„ط¹ط§ط¨ ظˆط§ظ„ط¨ط·ط§ظ‚ط§طھ.
+name: yemen_top
+description: تطبيق يمن توب للخدمات الرقمية — شحن الألعاب والبطاقات.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -12,16 +12,16 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  http: ^1.2.0                 # ط§ظ„ط§طھطµط§ظ„ ط¨ط§ظ„ظ€ API
-  provider: ^6.1.2             # ط¥ط¯ط§ط±ط© ط§ظ„ط­ط§ظ„ط©
-  shared_preferences: ^2.2.3   # طھط®ط²ظٹظ† ط§ظ„طھظˆظƒظ† ظˆط§ط®طھظٹط§ط± ط§ظ„ط¹ظ…ظ„ط© ظ…ط­ظ„ظٹط§ظ‹
-  intl: 0.20.2                # طھظ†ط³ظٹظ‚ ط§ظ„ط£ط±ظ‚ط§ظ… ظˆط§ظ„طھظˆط§ط±ظٹط®
-  google_fonts: ^6.2.1         # ط®ط·ظˆط· Cairo / Tajawal
-  cached_network_image: ^3.3.1 # طµظˆط± ط§ظ„ظ…ظ†طھط¬ط§طھ
-  url_launcher: ^6.3.0
+  http: ^1.2.0                 # الاتصال بالـ API
+  provider: ^6.1.2             # إدارة الحالة
+  shared_preferences: ^2.2.3   # تخزين التوكن واختيار العملة محلياً
+  intl: 0.20.2                # تنسيق الأرقام والتواريخ
+  google_fonts: ^6.2.1         # خطوط Cairo / Tajawal
+  cached_network_image: ^3.3.1 # صور المنتجات
+  url_launcher: ^6.3.0         # فتح روابط واتساب والروابط الخارجية
   google_sign_in: ^7.2.0       # الدخول بحساب جوجل
-  lottie: ^3.1.0         # ظپطھط­ ط±ظˆط§ط¨ط· ظˆط§طھط³ط§ط¨ ظˆط§ظ„ط±ظˆط§ط¨ط· ط§ظ„ط®ط§ط±ط¬ظٹط©
-  # ط¥ط´ط¹ط§ط±ط§طھ Push (ط§ط®طھظٹط§ط±ظٹ â€” ظٹطھط·ظ„ط¨ ط¥ط¹ط¯ط§ط¯ Firebase):
+  lottie: ^3.1.0               # أنميشن شاشة البداية
+  # إشعارات Push (اختياري — يتطلب إعداد Firebase):
   # firebase_core: ^2.31.0
   # firebase_messaging: ^14.9.0
 

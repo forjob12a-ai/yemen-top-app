@@ -129,7 +129,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('الكود / التسليم:', style: TextStyle(color: AppColors.good, fontWeight: FontWeight.w800, fontSize: 12)),
+                    Text('الكود / التسليم:', style: TextStyle(color: AppColors.good, fontWeight: FontWeight.w800, fontSize: 12)),
                     const SizedBox(height: 4),
                     SelectableText(item.deliveredData!, style: AppTheme.display.copyWith(fontSize: 15)),
                   ],

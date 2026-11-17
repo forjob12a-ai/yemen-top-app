@@ -86,7 +86,7 @@ class _BannerSliderState extends State<BannerSlider> {
           color: AppColors.navy,
           borderRadius: BorderRadius.circular(18),
         ),
-        child: const Center(
+        child: Center(
             child: CircularProgressIndicator(color: AppColors.orange)),
       );
     }
@@ -146,12 +146,12 @@ class _BannerSliderState extends State<BannerSlider> {
                 placeholder: (_, __) => Container(color: AppColors.navy),
                 errorWidget: (_, __, ___) => Container(
                   decoration:
-                      const BoxDecoration(gradient: AppColors.orangeGradient),
+                      BoxDecoration(gradient: AppColors.orangeGradient),
                 ),
               )
             else
               Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                       gradient: AppColors.orangeGradient)),
             if (b.title != null || b.subtitle != null)
               Container(

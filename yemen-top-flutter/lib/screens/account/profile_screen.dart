@@ -60,7 +60,7 @@ class ProfileScreen extends StatelessWidget {
                       color: AppColors.navy, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.line)),
                   child: Row(
                     children: [
-                      const Icon(Icons.account_balance_wallet, color: AppColors.gold),
+                      Icon(Icons.account_balance_wallet, color: AppColors.gold),
                       const SizedBox(width: 10),
                       Text('رصيد المحفظة', style: TextStyle(color: AppColors.muted)),
                       const Spacer(),
@@ -147,7 +147,7 @@ class ProfileScreen extends StatelessWidget {
               Navigator.pop(ctx);
               context.read<AuthProvider>().logout();
             },
-            child: const Text('خروج', style: TextStyle(color: AppColors.bad)),
+            child: Text('خروج', style: TextStyle(color: AppColors.bad)),
           ),
         ],
       ),
@@ -223,7 +223,7 @@ class ProfileScreen extends StatelessWidget {
                       if (ctx.mounted) {
                         Navigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('تم الحفظ بنجاح'), backgroundColor: AppColors.good));
+                            SnackBar(content: const Text('تم الحفظ بنجاح'), backgroundColor: AppColors.good));
                       }
                     } on ApiException catch (e) {
                       setSheet(() => saving = false);
@@ -232,7 +232,7 @@ class ProfileScreen extends StatelessWidget {
                     } catch (_) {
                       setSheet(() => saving = false);
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                          const SnackBar(content: Text('تعذّر الحفظ'), backgroundColor: AppColors.bad));
+                          SnackBar(content: const Text('تعذّر الحفظ'), backgroundColor: AppColors.bad));
                     }
                   },
                   child: saving

@@ -36,7 +36,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     final authed = context.watch<AuthProvider>().isAuthenticated;
     return Scaffold(
-      appBar: AppBar(title: const Text('طلباتي'), automaticallyImplyLeading: false),
+      appBar: AppBar(title: const Text('طلباتي')),
       body: !authed
           ? const AuthRequiredView(message: 'سجّل الدخول لعرض طلباتك.')
           : Builder(builder: (context) {

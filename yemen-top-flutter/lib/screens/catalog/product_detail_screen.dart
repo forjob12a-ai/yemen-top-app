@@ -166,8 +166,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(pkg.name, style: AppTheme.display.copyWith(fontSize: 15.5)),
-                    if (out) const Padding(
-                      padding: EdgeInsets.only(top: 3),
+                    if (out) Padding(
+                      padding: const EdgeInsets.only(top: 3),
                       child: Text('غير متوفّر حالياً', style: TextStyle(color: AppColors.bad, fontSize: 12)),
                     ),
                   ],

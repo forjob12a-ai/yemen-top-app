@@ -63,7 +63,7 @@ class _TopupScreenState extends State<TopupScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم استلام طلب الشحن! سيُضاف الرصيد بعد المراجعة.'), backgroundColor: AppColors.good));
+          SnackBar(content: const Text('تم استلام طلب الشحن! سيُضاف الرصيد بعد المراجعة.'), backgroundColor: AppColors.good));
       Navigator.pop(context);
     } on ApiException catch (e) {
       _snack(e.firstError);

@@ -132,8 +132,8 @@ class _CartTile extends StatelessWidget {
               ),
               TextButton.icon(
                 onPressed: () => cart.remove(item),
-                icon: const Icon(Icons.delete_outline, size: 16, color: AppColors.bad),
-                label: const Text('حذف', style: TextStyle(color: AppColors.bad, fontSize: 12)),
+                icon: Icon(Icons.delete_outline, size: 16, color: AppColors.bad),
+                label: Text('حذف', style: TextStyle(color: AppColors.bad, fontSize: 12)),
               ),
             ],
           ),

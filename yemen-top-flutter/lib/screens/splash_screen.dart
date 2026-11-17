@@ -1,5 +1,5 @@
-﻿// ط´ط§ط´ط© ط§ظ„ط³ط¨ظ„ط§ط´ â€” ط£ظ†ظ…ظٹط´ظ† آ«ط¨ظˆط§ط¨ط© طھظˆط¨ ط§ظ„ظƒظˆظ†ظٹط©آ» (طھطµظ…ظٹظ… ط¬ط³ط± ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ)
-// ط§ظ„ظ…ظ†ط·ظ‚ ظ…ط­ظپظˆط¸: طھط­ظ…ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¯ط®ظˆظ„ + ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ ط¨ط§ظ„طھظˆط§ط²ظٹطŒ ظˆط§ظ„ط§ظ†طھظ‚ط§ظ„ ط¨ط¹ط¯ ط§ظƒطھظ…ط§ظ„ (ط§ظ„طھط­ظ…ظٹظ„ + ط§ظ„ط£ظ†ظ…ظٹط´ظ†) ظ…ط¹ط§ظ‹.
+// شاشة السبلاش — أنميشن «بوابة توب الكونية» (تصميم جسر المعلومات)
+// المنطق محفوظ: تحميل بيانات الدخول + الإعدادات بالتوازي، والانتقال بعد اكتمال (التحميل + الأنميشن) معاً.
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _boot() async {
     final auth = context.read<AuthProvider>();
     final config = context.read<AppConfigProvider>();
-    // طھط­ظ…ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¯ط®ظˆظ„ ظˆط¥ط¹ط¯ط§ط¯ط§طھ ط§ظ„طھط·ط¨ظٹظ‚ (ط§ظ„ط¹ظ…ظ„ط§طھ + ط§ظ„طھظˆط§طµظ„) ظ…ط¹ط§ظ‹ â€” ظƒظ…ط§ ظƒط§ظ†.
+    // تحميل بيانات الدخول وإعدادات التطبيق (العملات + التواصل) معاً — كما كان.
     await Future.wait([auth.bootstrap(), config.load()]);
     _bootDone = true;
     _tryNavigate();
@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
             });
           },
           errorBuilder: (_, __, ___) {
-            // ظ„ظˆ طھط¹ط°ظ‘ط± طھط­ظ…ظٹظ„ ط§ظ„ط£ظ†ظ…ظٹط´ظ† ظ„ط£ظٹ ط³ط¨ط¨ â€” ظ…ط§ ظ†ط¹ظ„ظ‘ظ‚ ط§ظ„ظ…ط³طھط®ط¯ظ…: ظ†ط¹طھط¨ط±ظ‡ ظ…ظ†طھظ‡ظٹط§ظ‹.
+            // لو تعذّر تحميل الأنميشن لأي سبب — ما نعلّق المستخدم: نعتبره منتهياً.
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _animDone = true;
               _tryNavigate();
